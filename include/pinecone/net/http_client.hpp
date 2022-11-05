@@ -79,23 +79,20 @@ struct http_client<threading_mode::sync> {
     domain::operation<Op> operation(std::move(op_args), _api_key_header);
     _data.clear();
     auto result =
-        operation.set_opts(_curl_handle)
-            .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_VERBOSE, 1L); })
+        operation
+            .set_opts(_curl_handle)
+            // .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_VERBOSE, 1L); })
+            // // TODO: dynamically enable?
             .and_then([this]() {
               return curl_easy_setopt(_curl_handle, CURLOPT_WRITEFUNCTION, http_client::read);
             })
             .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_WRITEDATA, this); })
             .and_then([this]() { return curl_easy_perform(_curl_handle); });
     if (result.is_error()) {
-      std::cout << "Failed to send request: " << result.to_string() << std::endl;
       return json::array({});
     }
 
-    for (auto const& i : _data) {
-      std::cout << static_cast<char>(i);
-    }
-    std::cout << std::endl;
-    return json::parse(_data.begin(), _data.end());
+    return json::parse(_data);
   }
 
  private:

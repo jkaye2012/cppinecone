@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "pinecone/net/http_client.hpp"
 #include "pinecone/pinecone.hpp"
 
 int main(int argc, char** argv)

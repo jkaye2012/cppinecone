@@ -37,8 +37,8 @@ struct pinecone_client {
   mutable net::url_builder _url_builder;
   mutable std::unique_ptr<net::http_client<Mode>> _http_client;
 
-  explicit pinecone_client(net::url_builder url_builder,
-                           std::unique_ptr<net::http_client<Mode>> client) noexcept
+  pinecone_client(net::url_builder url_builder,
+                  std::unique_ptr<net::http_client<Mode>> client) noexcept
       : _url_builder(std::move(url_builder)), _http_client(std::move(client))
   {
   }
