@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.20)
+
 set(CMAKE_CXX_STANDARD 17)
 
 project(main)
 
 include(ExternalProject)
+include(FetchContent)
 
 # TODO: allow user to configure this
 set(CURL_VERSION 7.86.0)
@@ -21,7 +23,14 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
 )
 
+# TODO: configurable?
+set(JSON_VERSION 3.11.2)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+
 add_executable(main main.cpp)
 
 include_directories(${CURL_INCLUDE_DIR})
-target_link_libraries(main ${CURL_LIBRARIES})
+target_link_libraries(main PRIVATE ${CURL_LIBRARIES})
+target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)
