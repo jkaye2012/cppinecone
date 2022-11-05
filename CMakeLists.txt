@@ -9,8 +9,8 @@ include(FetchContent)
 
 # TODO: allow user to configure these
 set(CURL_VERSION 7.86.0)
-set(CURL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/include)
-set(CURL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/lib/libcurl.a)
+# set(CURL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/include)
+# set(CURL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/lib/libcurl.a)
 set(JSON_VERSION 3.11.2)
 set(CATCH2_VERSION 3.1.1)
 
@@ -24,6 +24,7 @@ ExternalProject_Add(
   BUILD_COMMAND make
   BUILD_IN_SOURCE 1
 )
+find_package(CURL REQUIRED)
 
 FetchContent_Declare(json
   URL https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
