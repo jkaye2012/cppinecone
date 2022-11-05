@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_BUILD_TYPE Debug)
 
 project(main)
 
@@ -32,6 +33,7 @@ FetchContent_Declare(json
 FetchContent_MakeAvailable(json)
 
 add_executable(main main.cpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include_directories(${CURL_INCLUDE_DIR})
 target_link_libraries(main PRIVATE ${CURL_LIBRARIES})

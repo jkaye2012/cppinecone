@@ -1,3 +1,4 @@
 # To do list
 
-- [ ] Cmake requires libcurl be installed on the system; vend a copy to fall back on?
+- [ ] CMake dependency management should be improved, at least modularized
+- [ ] Document global initialization for curl
