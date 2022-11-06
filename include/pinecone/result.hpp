@@ -5,6 +5,8 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
+#include "pinecone/domain/curl_result.hpp"
+
 using json = nlohmann::json;
 
 namespace pinecone
@@ -49,12 +51,17 @@ struct failure_reason {
 
 template <>
 struct failure_reason<failure::request_rejected> {
-  explicit constexpr failure_reason(CURLcode curl_code) noexcept : _curl_code(curl_code) {}
+  explicit constexpr failure_reason(domain::curl_result::error_type err) noexcept : _curl_err(err)
+  {
+  }
 
-  [[nodiscard]] constexpr auto curl_code() const noexcept -> CURLcode { return _curl_code; }
+  [[nodiscard]] constexpr auto curl_error() const noexcept -> domain::curl_result::error_type
+  {
+    return _curl_err;
+  }
 
  private:
-  CURLcode _curl_code;
+  domain::curl_result::error_type _curl_err;
 };
 using request_rejected = failure_reason<failure::request_rejected>;
 
@@ -87,18 +94,21 @@ using parsing_failed = failure_reason<failure::parsing_failed>;
 
 template <typename T>
 struct result {
-  using value_type = std::variant<T, request_rejected, request_failed, parsing_failed>;
+  using error_type = std::variant<request_rejected, request_failed, parsing_failed>;
+  using value_type = std::variant<T, error_type>;
 
   // NOLINTNEXTLINE
   result(T value) noexcept : _value(std::move(value)) {}
   // NOLINTNEXTLINE
-  result(CURLcode code) noexcept : _value(request_rejected(code)) {}
+  result(domain::curl_result::error_type err) noexcept : _value(request_rejected(err)) {}
   // NOLINTNEXTLINE
   result(uint16_t code, std::string body) noexcept : _value(request_failed(code, std::move(body)))
   {
   }
   // NOLINTNEXTLINE
   result(json::exception ex) noexcept : _value(parsing_failed(std::move(ex))) {}
+  // NOLINTNEXTLINE
+  result(error_type err) noexcept : _value(std::move(err)) {}
 
   [[nodiscard]] constexpr auto failure_reason() const noexcept -> failure
   {
@@ -120,6 +130,22 @@ struct result {
   }
 
   [[nodiscard]] constexpr auto is_failed() const noexcept -> bool { return !is_successful(); }
+
+  template <typename U>
+  [[nodiscard]] constexpr auto propagate() noexcept -> result<U>
+  {
+    return {std::move(std::get<error_type>(_value))};
+  }
+
+  template <typename U>
+  constexpr auto and_then(std::function<result<U>(T&)> const& func) noexcept -> result<U>
+  {
+    if (is_failed()) {
+      return propagate<U>();
+    }
+
+    return func(std::get<T>(_value));
+  }
 
   [[nodiscard]] constexpr auto operator->() noexcept -> T* { return &std::get<T>(_value); }
   [[nodiscard]] constexpr auto operator*() noexcept -> T& { return std::get<T>(_value); }

@@ -6,12 +6,16 @@
 
 #include <curl/curl.h>
 
+#include "pinecone/util/visit.hpp"
+
 namespace pinecone::domain
 {
 /**
  * Models the possibly of failure for API operations.
  */
 struct [[nodiscard]] curl_result {
+  using error_type = std::variant<CURLcode, curl_slist*>;
+
   constexpr curl_result() noexcept = default;
 
   // NOLINTNEXTLINE
@@ -38,6 +42,11 @@ struct [[nodiscard]] curl_result {
 
   [[nodiscard]] constexpr auto is_error() const noexcept -> bool { return !is_success(); }
 
+  [[nodiscard]] constexpr auto error() const noexcept -> error_type
+  {
+    return std::get<error_type>(_value);
+  }
+
   constexpr auto and_then(std::function<curl_result()> const& func) const noexcept -> curl_result
   {
     if (is_error()) {
@@ -53,15 +62,16 @@ struct [[nodiscard]] curl_result {
       case 0:
         return "Success";
       case 1:
-        return std::to_string(std::get<CURLcode>(_value));
-      case 2:
-        return "Bad header list";
+        return std::visit(
+            util::overloaded{[](CURLcode arg) { return std::to_string(arg); },
+                             [](curl_slist*) -> std::string { return "Bad header list"; }},
+            error());
       default:
         return "Unknown";
     }
   }
 
  private:
-  std::variant<std::monostate, CURLcode, curl_slist*> _value;
+  std::variant<std::monostate, error_type> _value;
 };
 }  // namespace pinecone::domain

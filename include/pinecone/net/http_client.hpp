@@ -13,6 +13,7 @@
 
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/net/url_builder.hpp"
+#include "pinecone/result.hpp"
 
 using json = nlohmann::json;
 
@@ -74,7 +75,7 @@ struct http_client<threading_mode::sync> {
   auto operator=(http_client&&) noexcept -> http_client& = default;
 
   template <domain::operation_type Op>
-  auto request(domain::operation_args<Op> op_args) noexcept -> json  // TODO: model failure
+  auto request(domain::operation_args<Op> op_args) noexcept -> result<json>
   {
     domain::operation<Op> operation(std::move(op_args), _api_key_header);
     _data.clear();
@@ -89,8 +90,10 @@ struct http_client<threading_mode::sync> {
             .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_WRITEDATA, this); })
             .and_then([this]() { return curl_easy_perform(_curl_handle); });
     if (result.is_error()) {
-      return json::array({});
+      return {result.error()};
     }
+
+    // TODO: check for request failure
 
     return json::parse(_data);
   }
