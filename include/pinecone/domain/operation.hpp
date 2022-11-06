@@ -5,8 +5,8 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+#include "pinecone/domain/curl_result.hpp"
 #include "pinecone/domain/method.hpp"
-#include "pinecone/domain/result.hpp"
 
 namespace pinecone::domain
 {
@@ -110,21 +110,22 @@ struct arg_base {
 
 template <operation_type>
 struct operation_args : public arg_base {
-  explicit operation_args(std::string const& url_prefix) noexcept : arg_base(build_url(url_prefix))
-  {
-  }
+  explicit operation_args(std::string_view url_prefix) noexcept : arg_base(build_url(url_prefix)) {}
 
-  [[nodiscard]] static auto build_url(std::string const& url_prefix) noexcept -> std::string
+  [[nodiscard]] static auto build_url(std::string_view url_prefix) noexcept -> std::string
   {
-    return url_prefix;
+    return std::string(url_prefix);
   }
   // NOLINTNEXTLINE
-  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::result { return {}; }
+  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
+  {
+    return {};
+  }
 };
 
 template <>
 struct operation_args<operation_type::index_describe> : public arg_base {
-  operation_args(std::string const& url_prefix, std::string const& index_name) noexcept
+  operation_args(std::string_view url_prefix, std::string_view index_name) noexcept
       : arg_base(build_url(url_prefix, index_name)), _index_name(index_name)
   {
   }
@@ -138,7 +139,10 @@ struct operation_args<operation_type::index_describe> : public arg_base {
   }
 
   // NOLINTNEXTLINE
-  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::result { return {}; }
+  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
+  {
+    return {};
+  }
 
  private:
   std::string_view _index_name;
@@ -167,10 +171,10 @@ struct operation {
   [[nodiscard]] constexpr auto method() const noexcept { return _method; }
   [[nodiscard]] constexpr auto api_key() const noexcept { return _api_key; }
 
-  constexpr auto set_opts(CURL* curl) noexcept -> domain::result
+  constexpr auto set_opts(CURL* curl) noexcept -> domain::curl_result
   {
     curl_easy_reset(curl);
-    return domain::result(curl_easy_setopt(curl, CURLOPT_URL, _args.url()))
+    return domain::curl_result(curl_easy_setopt(curl, CURLOPT_URL, _args.url()))
         .and_then([this]() { return set_header_value(_api_key.c_str()); })
         .and_then([this]() { return set_header_value(kContentType); })
         .and_then([this, curl]() { return _args.set_opts(curl, _headers); })
@@ -184,7 +188,7 @@ struct operation {
 
   curl_slist* _headers{};
 
-  constexpr auto set_header_value(char const* header) noexcept -> result
+  constexpr auto set_header_value(char const* header) noexcept -> curl_result
   {
     _headers = curl_slist_append(_headers, header);
     return _headers;

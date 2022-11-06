@@ -8,6 +8,7 @@
 #include "pinecone/index_types.hpp"
 #include "pinecone/net/http_client.hpp"
 #include "pinecone/net/url_builder.hpp"
+#include "pinecone/result.hpp"
 
 namespace pinecone
 {
@@ -27,15 +28,14 @@ struct pinecone_client {
     return std::nullopt;
   }
 
-  [[nodiscard]] auto list_indexes() const noexcept -> std::optional<indexes>
+  [[nodiscard]] auto list_indexes() const noexcept -> result<indexes>
   {
     auto url = _url_builder.build(domain::operation_type::index_list);
     domain::operation_args<domain::operation_type::index_list> args(url);
     return indexes::build(_http_client->request(std::move(args)));
   }
 
-  [[nodiscard]] auto describe_index(std::string const& name) const noexcept
-      -> std::optional<database>
+  [[nodiscard]] auto describe_index(std::string const& name) const noexcept -> result<database>
   {
     auto url = _url_builder.build(domain::operation_type::index_describe);
     domain::operation_args<domain::operation_type::index_describe> args(url, name);

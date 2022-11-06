@@ -11,11 +11,11 @@ namespace pinecone::domain
 /**
  * Models the possibly of failure for API operations.
  */
-struct [[nodiscard]] result {
-  constexpr result() noexcept = default;
+struct [[nodiscard]] curl_result {
+  constexpr curl_result() noexcept = default;
 
   // NOLINTNEXTLINE
-  constexpr result(CURLcode code) noexcept
+  constexpr curl_result(CURLcode code) noexcept
   {
     if (code != CURLE_OK) {
       _value = code;
@@ -25,7 +25,7 @@ struct [[nodiscard]] result {
   }
 
   // NOLINTNEXTLINE
-  constexpr result(curl_slist* list) noexcept
+  constexpr curl_result(curl_slist* list) noexcept
   {
     if (list == nullptr) {
       _value = list;
@@ -38,7 +38,7 @@ struct [[nodiscard]] result {
 
   [[nodiscard]] constexpr auto is_error() const noexcept -> bool { return !is_success(); }
 
-  constexpr auto and_then(std::function<result()> const& func) const noexcept -> result
+  constexpr auto and_then(std::function<curl_result()> const& func) const noexcept -> curl_result
   {
     if (is_error()) {
       return *this;

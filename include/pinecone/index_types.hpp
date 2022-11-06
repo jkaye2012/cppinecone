@@ -8,6 +8,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "pinecone/result.hpp"
+
 using json = nlohmann::json;
 
 namespace pinecone
@@ -41,6 +43,7 @@ enum class database_state {
   if (str == "Ready") {
     return database_state::ready;
   }
+
   return database_state::unknown;
 }
 
@@ -48,10 +51,17 @@ enum class database_state {
  * @brief The status of an individual database.
  */
 struct database_status {
-  [[nodiscard]] static auto build(json api_result) noexcept -> std::optional<database_status>
+  /**
+   * @brief Constructs a database status from its json representation.
+   * @details
+   * This function is allowed to throw to allow for easier composition in higher-order parsers; as
+   * such, it should only be called from within other parsers to ensure that exceptions do not
+   * escape.
+   */
+  [[nodiscard]] static auto build(json api_result) -> database_status
   {
     std::string const& state(api_result["state"]);
-    return database_status(api_result["ready"], from_string(state));
+    return {database_status(api_result["ready"], from_string(state))};
   }
 
  private:
@@ -79,17 +89,16 @@ struct database {
   [[nodiscard]] constexpr auto shards() const noexcept -> uint16_t { return _shards; }
   [[nodiscard]] constexpr auto status() const noexcept -> database_status const& { return _status; }
 
-  static auto build(json api_result) noexcept -> std::optional<database>
+  static auto build(json api_result) noexcept -> result<database>
   {
-    if (!api_result.is_object() || !api_result["database"].is_object()) {
-      return std::nullopt;
+    try {
+      auto status = database_status::build(api_result["status"]);
+      auto json_db = api_result["database"];
+      return database(json_db["name"], json_db["dimension"], json_db["metric"], json_db["pod_type"],
+                      json_db["pods"], json_db["replicas"], json_db["shards"], status);
+    } catch (json::exception& ex) {
+      return {std::move(ex)};
     }
-
-    auto status = database_status::build(api_result["status"]);
-    auto json_db = api_result["database"];
-
-    return database(json_db["name"], json_db["dimension"], json_db["metric"], json_db["pod_type"],
-                    json_db["pods"], json_db["replicas"], json_db["shards"], status.value());
   }
 
  private:
@@ -116,22 +125,18 @@ struct database {
   }
 };
 
-// TODO: properly model failure, std::optional is nowhere near sufficient
-
 struct indexes {
-  static auto build(json api_result) noexcept -> std::optional<indexes>
+  static auto build(json api_result) noexcept -> result<indexes>
   {
-    if (!api_result.is_array()) {
-      return std::nullopt;
-    }
     std::vector<std::string> names;
     names.reserve(api_result.size());
-    for (auto& index : api_result) {
-      if (!index.is_string()) {
-        return std::nullopt;
-      }
 
-      names.emplace_back(std::move(index));
+    try {
+      for (auto& index : api_result) {
+        names.emplace_back(std::move(index));
+      }
+    } catch (json::exception& ex) {
+      return {std::move(ex)};
     }
 
     return indexes(std::move(names));
