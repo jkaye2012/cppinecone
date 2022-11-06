@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/index_types.hpp"
@@ -31,6 +32,14 @@ struct pinecone_client {
     auto url = _url_builder.build(domain::operation_type::index_list);
     domain::operation_args<domain::operation_type::index_list> args(url);
     return indexes::build(_http_client->request(std::move(args)));
+  }
+
+  [[nodiscard]] auto describe_index(std::string const& name) const noexcept
+      -> std::optional<database>
+  {
+    auto url = _url_builder.build(domain::operation_type::index_describe);
+    domain::operation_args<domain::operation_type::index_describe> args(url, name);
+    return database::build(_http_client->request(std::move(args)));
   }
 
  private:

@@ -11,4 +11,7 @@ int main(int argc, char** argv)
   for (auto const& idx : indexes->names()) {
     std::cout << idx << std::endl;
   }
+
+  auto db = client->describe_index("squad");
+  std::cout << db->dimension() << std::endl;
 }
