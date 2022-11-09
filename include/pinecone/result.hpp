@@ -67,16 +67,16 @@ using request_rejected = failure_reason<failure::request_rejected>;
 
 template <>
 struct failure_reason<failure::request_failed> {
-  failure_reason(uint16_t code, std::string body) noexcept
+  failure_reason(int64_t code, std::string body) noexcept
       : _response_code(code), _body(std::move(body))
   {
   }
 
-  [[nodiscard]] constexpr auto response_code() const noexcept -> uint16_t { return _response_code; }
+  [[nodiscard]] constexpr auto response_code() const noexcept -> int64_t { return _response_code; }
   [[nodiscard]] constexpr auto body() const noexcept -> std::string const& { return _body; }
 
  private:
-  uint16_t _response_code;
+  int64_t _response_code;
   std::string _body;
 };
 using request_failed = failure_reason<failure::request_failed>;
@@ -105,9 +105,7 @@ struct result {
   // NOLINTNEXTLINE
   result(domain::curl_result::error_type err) noexcept : _value(request_rejected(err)) {}
   // NOLINTNEXTLINE
-  result(uint16_t code, std::string body) noexcept : _value(request_failed(code, std::move(body)))
-  {
-  }
+  result(int64_t code, std::string body) noexcept : _value(request_failed(code, std::move(body))) {}
   // NOLINTNEXTLINE
   result(json::exception ex) noexcept : _value(parsing_failed(std::move(ex))) {}
   // NOLINTNEXTLINE

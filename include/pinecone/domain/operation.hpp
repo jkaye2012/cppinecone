@@ -126,8 +126,9 @@ struct list_operation_args : public arg_base {
   }
 };
 
-struct describe_operation_args : public arg_base {
-  describe_operation_args(std::string_view url_prefix, std::string_view resource_name) noexcept
+struct describe_delete_operation_args : public arg_base {
+  describe_delete_operation_args(std::string_view url_prefix,
+                                 std::string_view resource_name) noexcept
       : arg_base(build_url(url_prefix, resource_name))
   {
   }
@@ -157,11 +158,17 @@ struct operation_args<operation_type::collection_list> : public list_operation_a
 };
 
 template <>
-struct operation_args<operation_type::index_describe> : public describe_operation_args {
-  using describe_operation_args::describe_operation_args;
+struct operation_args<operation_type::index_describe> : public describe_delete_operation_args {
+  using describe_delete_operation_args::describe_delete_operation_args;
+};
+
+template <>
+struct operation_args<operation_type::collection_delete> : public describe_delete_operation_args {
+  using describe_delete_operation_args::describe_delete_operation_args;
 };
 
 static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
+static constexpr auto kDelete = "DELETE";
 
 /**
  * @brief Data common to all Pinecone API operation types.
@@ -175,6 +182,7 @@ struct operation {
 
   static constexpr auto op_type = Op;
 
+  // TODO: might be able to re-use headers across all requests
   ~operation() noexcept { curl_slist_free_all(_headers); }
   operation(operation const&) = delete;
   auto operator=(operation const&) = delete;
@@ -187,11 +195,22 @@ struct operation {
   constexpr auto set_opts(CURL* curl) noexcept -> domain::curl_result
   {
     curl_easy_reset(curl);
-    return domain::curl_result(curl_easy_setopt(curl, CURLOPT_URL, _args.url()))
+
+    return set_method_opts(curl)
         .and_then([this]() { return set_header_value(_api_key.c_str()); })
         .and_then([this]() { return set_header_value(kContentType); })
+        .and_then([this, curl]() { return curl_easy_setopt(curl, CURLOPT_URL, _args.url()); })
         .and_then([this, curl]() { return _args.set_opts(curl, _headers); })
         .and_then([this, curl]() { return curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers); });
+  }
+
+  constexpr auto set_method_opts(CURL* curl) noexcept -> domain::curl_result
+  {
+    if constexpr (op_method(op_type) == method::del) {
+      return {curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kDelete)};
+    }
+
+    return {};
   }
 
  private:
