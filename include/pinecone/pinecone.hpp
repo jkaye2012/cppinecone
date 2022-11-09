@@ -14,6 +14,10 @@
 
 namespace pinecone
 {
+using type = domain::operation_type;
+template <type t>
+using args = domain::operation_args<t>;
+
 /**
  * @brief The Pinecone REST API client.
  */
@@ -32,27 +36,23 @@ struct pinecone_client {
 
   [[nodiscard]] auto list_indexes() const noexcept -> result<types::indexes>
   {
-    domain::operation_args<domain::operation_type::index_list> args(_url_builder);
-    return _http_client->request(std::move(args));
+    return _http_client->request(args<type::index_list>{_url_builder});
   }
 
   [[nodiscard]] auto describe_index(std::string const& name) const noexcept
       -> result<types::database>
   {
-    domain::operation_args<domain::operation_type::index_describe> args(_url_builder, name);
-    return _http_client->request(std::move(args));
+    return _http_client->request(args<type::index_describe>{_url_builder, name});
   }
 
   [[nodiscard]] auto list_collections() const noexcept -> result<types::collections>
   {
-    domain::operation_args<domain::operation_type::collection_list> args(_url_builder);
-    return _http_client->request(std::move(args));
+    return _http_client->request(args<type::collection_list>{_url_builder});
   }
 
   [[nodiscard]] auto delete_collection(std::string const& name) const noexcept -> result<json>
   {
-    domain::operation_args<domain::operation_type::collection_delete> args(_url_builder, name);
-    return _http_client->request(std::move(args));
+    return _http_client->request(args<type::collection_delete>{_url_builder, name});
   }
 
  private:
