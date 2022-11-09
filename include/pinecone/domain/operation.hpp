@@ -101,8 +101,19 @@ constexpr auto op_method(operation_type op) -> method
 
 struct arg_base {
   explicit arg_base(std::string url) : _url(std::move(url)) {}
+  virtual ~arg_base() = default;
+  arg_base(arg_base const&) = default;
+  arg_base(arg_base&&) noexcept = default;
+  auto operator=(arg_base const&) -> arg_base& = default;
+  auto operator=(arg_base&&) noexcept -> arg_base& = default;
 
   [[nodiscard]] constexpr auto url() const noexcept -> char const* { return _url.c_str(); }
+
+  // NOLINTNEXTLINE
+  virtual auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
+  {
+    return {};
+  }
 
  private:
   std::string _url;
@@ -110,18 +121,23 @@ struct arg_base {
 
 struct list_operation_args : public arg_base {
   explicit list_operation_args(std::string_view url_prefix) noexcept
-      : arg_base(build_url(url_prefix))
+      : arg_base(std::string(url_prefix))
+  {
+  }
+};
+
+struct describe_operation_args : public arg_base {
+  describe_operation_args(std::string_view url_prefix, std::string_view resource_name) noexcept
+      : arg_base(build_url(url_prefix, resource_name))
   {
   }
 
-  [[nodiscard]] static auto build_url(std::string_view url_prefix) noexcept -> std::string
+  [[nodiscard]] static auto build_url(std::string_view url_prefix,
+                                      std::string_view resource_name) noexcept -> std::string
   {
-    return std::string(url_prefix);
-  }
-  // NOLINTNEXTLINE
-  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
-  {
-    return {};
+    std::ostringstream oss;
+    oss << url_prefix << resource_name;
+    return oss.str();
   }
 };
 
@@ -141,28 +157,8 @@ struct operation_args<operation_type::collection_list> : public list_operation_a
 };
 
 template <>
-struct operation_args<operation_type::index_describe> : public arg_base {
-  operation_args(std::string_view url_prefix, std::string_view index_name) noexcept
-      : arg_base(build_url(url_prefix, index_name)), _index_name(index_name)
-  {
-  }
-
-  [[nodiscard]] static auto build_url(std::string_view url_prefix,
-                                      std::string_view index_name) noexcept -> std::string
-  {
-    std::ostringstream oss;
-    oss << url_prefix << index_name;
-    return oss.str();
-  }
-
-  // NOLINTNEXTLINE
-  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
-  {
-    return {};
-  }
-
- private:
-  std::string_view _index_name;
+struct operation_args<operation_type::index_describe> : public describe_operation_args {
+  using describe_operation_args::describe_operation_args;
 };
 
 static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
