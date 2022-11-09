@@ -19,11 +19,11 @@ struct operation_args<operation_type::index_list>
 
   using parsed_type = types::indexes;
 
-  static const std::function<result<types::indexes>(json&&)> parser;
+  static const std::function<result<parsed_type>(json&&)> parser;
 };
 inline std::function<result<types::indexes>(json&&)> const
     operation_args<operation_type::index_list>::parser =
-        [](auto&& json) { return types::indexes::build(std::forward<decltype(json)>(json)); };
+        [](auto&& json) { return parsed_type::build(std::forward<decltype(json)>(json)); };
 
 template <>
 struct operation_args<operation_type::index_describe>
@@ -32,17 +32,23 @@ struct operation_args<operation_type::index_describe>
 
   using parsed_type = types::database;
 
-  static const std::function<result<types::database>(json&&)> parser;
+  static const std::function<result<parsed_type>(json&&)> parser;
 };
 inline std::function<result<types::database>(json&&)> const
     operation_args<operation_type::index_describe>::parser =
-        [](auto&& json) { return types::database::build(std::forward<decltype(json)>(json)); };
+        [](auto&& json) { return parsed_type::build(std::forward<decltype(json)>(json)); };
 
 template <>
 struct operation_args<operation_type::index_delete>
     : public describe_delete_operation_args<operation_type::index_delete> {
   using describe_delete_operation_args::describe_delete_operation_args;
+
+  using parsed_type = json;
+
+  static const std::function<result<parsed_type>(json&&)> parser;
 };
+inline std::function<result<json>(json&&)> const
+    operation_args<operation_type::index_delete>::parser = [](auto&& json) { return json; };
 
 template <>
 struct operation_args<operation_type::collection_list>
@@ -51,17 +57,24 @@ struct operation_args<operation_type::collection_list>
 
   using parsed_type = types::collections;
 
-  static const std::function<result<types::collections>(json&&)> parser;
+  static const std::function<result<parsed_type>(json&&)> parser;
 };
 inline std::function<result<types::collections>(json&&)> const
     operation_args<operation_type::collection_list>::parser =
-        [](auto&& json) { return types::collections::build(std::forward<decltype(json)>(json)); };
+        [](auto&& json) { return parsed_type::build(std::forward<decltype(json)>(json)); };
 
 template <>
 struct operation_args<operation_type::collection_describe>
     : public describe_delete_operation_args<operation_type::collection_describe> {
   using describe_delete_operation_args::describe_delete_operation_args;
+
+  using parsed_type = types::collection;
+
+  static const std::function<result<parsed_type>(json&&)> parser;
 };
+inline std::function<result<types::collection>(json&&)> const
+    operation_args<operation_type::collection_describe>::parser =
+        [](auto&& json) { return parsed_type::build(std::forward<decltype(json)>(json)); };
 
 template <>
 struct operation_args<operation_type::collection_delete>

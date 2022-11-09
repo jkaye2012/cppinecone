@@ -45,9 +45,20 @@ struct pinecone_client {
     return _http_client->request(args<type::index_describe>{_url_builder, name});
   }
 
+  [[nodiscard]] auto delete_index(std::string const& name) const noexcept -> result<json>
+  {
+    return _http_client->request(args<type::index_delete>{_url_builder, name});
+  }
+
   [[nodiscard]] auto list_collections() const noexcept -> result<types::collections>
   {
     return _http_client->request(args<type::collection_list>{_url_builder});
+  }
+
+  [[nodiscard]] auto describe_collection(std::string const& name) const noexcept
+      -> result<types::collection>
+  {
+    return _http_client->request(args<type::collection_describe>{_url_builder, name});
   }
 
   [[nodiscard]] auto delete_collection(std::string const& name) const noexcept -> result<json>

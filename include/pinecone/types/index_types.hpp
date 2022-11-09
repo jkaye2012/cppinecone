@@ -89,16 +89,12 @@ struct database {
   [[nodiscard]] constexpr auto shards() const noexcept -> uint16_t { return _shards; }
   [[nodiscard]] constexpr auto status() const noexcept -> database_status const& { return _status; }
 
-  static auto build(json api_result) noexcept -> result<database>
+  static auto build(json api_result) -> result<database>
   {
-    try {
-      auto status = database_status::build(api_result["status"]);
-      auto json_db = api_result["database"];
-      return database(json_db["name"], json_db["dimension"], json_db["metric"], json_db["pod_type"],
-                      json_db["pods"], json_db["replicas"], json_db["shards"], status);
-    } catch (json::exception& ex) {
-      return {std::move(ex)};
-    }
+    auto status = database_status::build(api_result["status"]);
+    auto json_db = api_result["database"];
+    return database(json_db["name"], json_db["dimension"], json_db["metric"], json_db["pod_type"],
+                    json_db["pods"], json_db["replicas"], json_db["shards"], status);
   }
 
  private:
@@ -125,18 +121,35 @@ struct database {
   }
 };
 
+struct collection {
+  [[nodiscard]] auto name() const noexcept -> std::string { return _name; }
+  [[nodiscard]] auto size() const noexcept -> uint64_t { return _size; }
+  [[nodiscard]] auto status() const noexcept -> std::string { return _status; }
+
+  static auto build(json api_result) -> result<collection>
+  {
+    return collection(api_result["name"], api_result["size"], api_result["status"]);
+  }
+
+ private:
+  std::string _name;
+  std::string _status;
+  uint64_t _size;
+
+  collection(std::string name, uint64_t size, std::string status) noexcept
+      : _name(std::move(name)), _status(std::move(status)), _size(size)
+  {
+  }
+};
+
 struct list {
-  static auto build(json api_result) noexcept -> result<list>
+  static auto build(json api_result) -> result<list>
   {
     std::vector<std::string> names;
     names.reserve(api_result.size());
 
-    try {
-      for (auto& index : api_result) {
-        names.emplace_back(std::move(index));
-      }
-    } catch (json::exception& ex) {
-      return {std::move(ex)};
+    for (auto& index : api_result) {
+      names.emplace_back(std::move(index));
     }
 
     return list(std::move(names));
