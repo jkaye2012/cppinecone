@@ -1,0 +1,1 @@
+#include "pinecone/domain/operation_type.hpp"

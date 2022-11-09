@@ -42,6 +42,7 @@ add_library(cppinecone STATIC
   src/domain/curl_result.cpp
   src/domain/method.cpp
   src/domain/operation.cpp
+  src/domain/operation_type.cpp
   src/util/visit.cpp
   src/net/http_client.cpp
   src/net/url_builder.cpp

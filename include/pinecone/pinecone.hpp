@@ -30,8 +30,7 @@ struct pinecone_client {
 
   [[nodiscard]] auto list_indexes() const noexcept -> result<indexes>
   {
-    auto url = _url_builder.build(domain::operation_type::index_list);
-    domain::operation_args<domain::operation_type::index_list> args(url);
+    domain::operation_args<domain::operation_type::index_list> args(_url_builder);
     std::function<result<indexes>(json&)> func = [](auto& json) {
       return indexes::build(std::move(json));
     };
@@ -40,8 +39,7 @@ struct pinecone_client {
 
   [[nodiscard]] auto describe_index(std::string const& name) const noexcept -> result<database>
   {
-    auto url = _url_builder.build(domain::operation_type::index_describe);
-    domain::operation_args<domain::operation_type::index_describe> args(url, name);
+    domain::operation_args<domain::operation_type::index_describe> args(_url_builder, name);
     // TODO: statically define continuation processors?
     std::function<result<database>(json&)> func = [](auto& json) {
       return database::build(std::move(json));
@@ -51,9 +49,7 @@ struct pinecone_client {
 
   [[nodiscard]] auto list_collections() const noexcept -> result<collections>
   {
-    // TODO: pass builder into args instead of url
-    auto url = _url_builder.build(domain::operation_type::collection_list);
-    domain::operation_args<domain::operation_type::collection_list> args(url);
+    domain::operation_args<domain::operation_type::collection_list> args(_url_builder);
     std::function<result<indexes>(json&)> func = [](auto& json) {
       return collections::build(std::move(json));
     };
@@ -62,8 +58,7 @@ struct pinecone_client {
 
   [[nodiscard]] auto delete_collection(std::string const& name) const noexcept -> result<json>
   {
-    auto url = _url_builder.build(domain::operation_type::collection_delete);
-    domain::operation_args<domain::operation_type::collection_delete> args(url, name);
+    domain::operation_args<domain::operation_type::collection_delete> args(_url_builder, name);
     std::function<result<json>(json&)> func = [](auto& json) { return json; };
     return _http_client->request(std::move(args)).and_then(func);
   }

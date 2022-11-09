@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "pinecone/domain/operation.hpp"
+#include "pinecone/domain/operation_type.hpp"
 
 namespace pinecone::net
 {

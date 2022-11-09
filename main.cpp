@@ -12,8 +12,8 @@ int main(int argc, char** argv)
   auto collections = client->list_collections();
   std::cout << "Num collections: " << collections->names().size() << std::endl;
 
-  auto deleted = client->delete_collection("squad-test-collection");
-  std::cout << "Deleted: " << *deleted << std::endl;
+  // auto deleted = client->delete_collection("squad-test-collection");
+  // std::cout << "Deleted: " << *deleted << std::endl;
 
   for (auto const& idx : indexes->names()) {
     std::cout << idx << std::endl;

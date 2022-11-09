@@ -11,7 +11,9 @@
 #include <curl/easy.h>
 #include <nlohmann/json.hpp>
 
+#include "pinecone/domain/method.hpp"
 #include "pinecone/domain/operation.hpp"
+#include "pinecone/domain/operation_type.hpp"
 #include "pinecone/net/url_builder.hpp"
 #include "pinecone/result.hpp"
 
