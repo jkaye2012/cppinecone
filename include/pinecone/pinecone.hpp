@@ -38,6 +38,17 @@ struct pinecone_client {
     return _http_client->request(std::move(args)).and_then(func);
   }
 
+  [[nodiscard]] auto list_collections() const noexcept -> result<collections>
+  {
+    // TODO: pass builder into args instead of url
+    auto url = _url_builder.build(domain::operation_type::collection_list);
+    domain::operation_args<domain::operation_type::collection_list> args(url);
+    std::function<result<indexes>(json&)> func = [](auto& json) {
+      return collections::build(std::move(json));
+    };
+    return _http_client->request(std::move(args)).and_then(func);
+  }
+
   [[nodiscard]] auto describe_index(std::string const& name) const noexcept -> result<database>
   {
     auto url = _url_builder.build(domain::operation_type::index_describe);

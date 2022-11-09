@@ -8,6 +8,10 @@ int main(int argc, char** argv)
 
   auto indexes = client->list_indexes();
   std::cout << "Num indexes: " << indexes->names().size() << std::endl;
+
+  auto collections = client->list_collections();
+  std::cout << "Num collections: " << collections->names().size() << std::endl;
+
   for (auto const& idx : indexes->names()) {
     std::cout << idx << std::endl;
   }

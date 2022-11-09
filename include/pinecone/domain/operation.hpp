@@ -108,9 +108,11 @@ struct arg_base {
   std::string _url;
 };
 
-template <operation_type>
-struct operation_args : public arg_base {
-  explicit operation_args(std::string_view url_prefix) noexcept : arg_base(build_url(url_prefix)) {}
+struct list_operation_args : public arg_base {
+  explicit list_operation_args(std::string_view url_prefix) noexcept
+      : arg_base(build_url(url_prefix))
+  {
+  }
 
   [[nodiscard]] static auto build_url(std::string_view url_prefix) noexcept -> std::string
   {
@@ -121,6 +123,21 @@ struct operation_args : public arg_base {
   {
     return {};
   }
+};
+
+template <operation_type>
+struct operation_args;
+
+// TODO: leave base operations here, move concrete operation associations to another file
+
+template <>
+struct operation_args<operation_type::index_list> : public list_operation_args {
+  using list_operation_args::list_operation_args;
+};
+
+template <>
+struct operation_args<operation_type::collection_list> : public list_operation_args {
+  using list_operation_args::list_operation_args;
 };
 
 template <>

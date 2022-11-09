@@ -125,8 +125,8 @@ struct database {
   }
 };
 
-struct indexes {
-  static auto build(json api_result) noexcept -> result<indexes>
+struct list {
+  static auto build(json api_result) noexcept -> result<list>
   {
     std::vector<std::string> names;
     names.reserve(api_result.size());
@@ -139,7 +139,7 @@ struct indexes {
       return {std::move(ex)};
     }
 
-    return indexes(std::move(names));
+    return list(std::move(names));
   }
 
   [[nodiscard]] auto names() const noexcept -> std::vector<std::string> const& { return _names; }
@@ -147,6 +147,8 @@ struct indexes {
  private:
   std::vector<std::string> _names;
 
-  explicit indexes(std::vector<std::string> names) noexcept : _names(std::move(names)) {}
+  explicit list(std::vector<std::string> names) noexcept : _names(std::move(names)) {}
 };
+using indexes = list;
+using collections = list;
 }  // namespace pinecone
