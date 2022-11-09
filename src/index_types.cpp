@@ -1,1 +1,0 @@
-#include "pinecone/index_types.hpp"

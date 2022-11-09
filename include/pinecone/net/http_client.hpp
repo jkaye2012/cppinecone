@@ -79,7 +79,8 @@ struct http_client<threading_mode::sync> {
   auto operator=(http_client&&) noexcept -> http_client& = default;
 
   template <domain::operation_type Op>
-  auto request(domain::operation_args<Op> op_args) noexcept -> result<json>
+  auto request(domain::operation_args<Op> op_args) noexcept
+      -> result<typename domain::operation_args<Op>::parsed_type>
   {
     domain::operation<Op> operation(std::move(op_args), _api_key_header);
     _data.clear();
@@ -101,9 +102,12 @@ struct http_client<threading_mode::sync> {
     curl_easy_getinfo(_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
     switch (http_code) {
       case kHttpOk:
-        return json::parse(_data);
       case kHttpAccepted:
-        return json();
+        try {
+          return domain::operation_args<Op>::parser(json::parse(_data));
+        } catch (json::exception& ex) {
+          return {std::move(ex)};
+        }
       default:
         return {http_code, std::string(_data.begin(), _data.end())};
     }

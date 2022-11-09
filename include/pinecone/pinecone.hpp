@@ -4,11 +4,13 @@
 #include <optional>
 #include <string>
 
+#include "pinecone/domain/index_operations.hpp"
 #include "pinecone/domain/operation.hpp"
-#include "pinecone/index_types.hpp"
+#include "pinecone/domain/operation_type.hpp"
 #include "pinecone/net/http_client.hpp"
 #include "pinecone/net/url_builder.hpp"
 #include "pinecone/result.hpp"
+#include "pinecone/types/index_types.hpp"
 
 namespace pinecone
 {
@@ -28,39 +30,29 @@ struct pinecone_client {
     return std::nullopt;
   }
 
-  [[nodiscard]] auto list_indexes() const noexcept -> result<indexes>
+  [[nodiscard]] auto list_indexes() const noexcept -> result<types::indexes>
   {
     domain::operation_args<domain::operation_type::index_list> args(_url_builder);
-    std::function<result<indexes>(json&)> func = [](auto& json) {
-      return indexes::build(std::move(json));
-    };
-    return _http_client->request(std::move(args)).and_then(func);
+    return _http_client->request(std::move(args));
   }
 
-  [[nodiscard]] auto describe_index(std::string const& name) const noexcept -> result<database>
+  [[nodiscard]] auto describe_index(std::string const& name) const noexcept
+      -> result<types::database>
   {
     domain::operation_args<domain::operation_type::index_describe> args(_url_builder, name);
-    // TODO: statically define continuation processors?
-    std::function<result<database>(json&)> func = [](auto& json) {
-      return database::build(std::move(json));
-    };
-    return _http_client->request(std::move(args)).and_then(func);
+    return _http_client->request(std::move(args));
   }
 
-  [[nodiscard]] auto list_collections() const noexcept -> result<collections>
+  [[nodiscard]] auto list_collections() const noexcept -> result<types::collections>
   {
     domain::operation_args<domain::operation_type::collection_list> args(_url_builder);
-    std::function<result<indexes>(json&)> func = [](auto& json) {
-      return collections::build(std::move(json));
-    };
-    return _http_client->request(std::move(args)).and_then(func);
+    return _http_client->request(std::move(args));
   }
 
   [[nodiscard]] auto delete_collection(std::string const& name) const noexcept -> result<json>
   {
     domain::operation_args<domain::operation_type::collection_delete> args(_url_builder, name);
-    std::function<result<json>(json&)> func = [](auto& json) { return json; };
-    return _http_client->request(std::move(args)).and_then(func);
+    return _http_client->request(std::move(args));
   }
 
  private:

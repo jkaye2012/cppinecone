@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-namespace pinecone
+namespace pinecone::types
 {
 /**
  * @brief Pod states for individual databases.
@@ -151,4 +151,4 @@ struct list {
 };
 using indexes = list;
 using collections = list;
-}  // namespace pinecone
+}  // namespace pinecone::types

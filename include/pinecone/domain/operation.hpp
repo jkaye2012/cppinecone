@@ -60,32 +60,6 @@ struct describe_delete_operation_args : public arg_base {
 template <operation_type>
 struct operation_args;
 
-// TODO: leave base operations here, move concrete operation associations to another file
-
-template <>
-struct operation_args<operation_type::index_list>
-    : public list_operation_args<operation_type::index_list> {
-  using list_operation_args::list_operation_args;
-};
-
-template <>
-struct operation_args<operation_type::collection_list>
-    : public list_operation_args<operation_type::collection_list> {
-  using list_operation_args::list_operation_args;
-};
-
-template <>
-struct operation_args<operation_type::index_describe>
-    : public describe_delete_operation_args<operation_type::index_describe> {
-  using describe_delete_operation_args::describe_delete_operation_args;
-};
-
-template <>
-struct operation_args<operation_type::collection_delete>
-    : public describe_delete_operation_args<operation_type::collection_delete> {
-  using describe_delete_operation_args::describe_delete_operation_args;
-};
-
 static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
 static constexpr auto kDelete = "DELETE";
 

@@ -36,13 +36,14 @@ include_directories(
  )
 
 add_library(cppinecone STATIC
-  src/index_types.cpp
   src/pinecone.cpp
   src/result.cpp
   src/domain/curl_result.cpp
+  src/domain/index_operations.cpp
   src/domain/method.cpp
   src/domain/operation.cpp
   src/domain/operation_type.cpp
+  src/types/index_types.cpp
   src/util/visit.cpp
   src/net/http_client.cpp
   src/net/url_builder.cpp
