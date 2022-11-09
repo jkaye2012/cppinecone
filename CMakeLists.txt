@@ -10,8 +10,6 @@ include(FetchContent)
 
 # TODO: allow user to configure these
 set(CURL_VERSION 7.86.0)
-# set(CURL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/include)
-# set(CURL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/lib/libcurl.a)
 set(JSON_VERSION 3.11.2)
 set(CATCH2_VERSION 3.1.1)
 
@@ -32,12 +30,27 @@ FetchContent_Declare(json
 )
 FetchContent_MakeAvailable(json)
 
-add_executable(main main.cpp)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(
+  ${CURL_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+ )
 
-include_directories(${CURL_INCLUDE_DIR})
-target_link_libraries(main PRIVATE ${CURL_LIBRARIES})
-target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)
+add_library(cppinecone STATIC
+  src/index_types.cpp
+  src/pinecone.cpp
+  src/result.cpp
+  src/domain/curl_result.cpp
+  src/domain/method.cpp
+  src/domain/operation.cpp
+  src/util/visit.cpp
+  src/net/http_client.cpp
+  src/net/url_builder.cpp
+)
+
+target_link_libraries(cppinecone PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohmann_json)
+
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE cppinecone)
 
 # TODO: make building tests optional?
 add_subdirectory(tests)

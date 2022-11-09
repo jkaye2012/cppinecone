@@ -92,6 +92,9 @@ struct failure_reason<failure::parsing_failed> {
 };
 using parsing_failed = failure_reason<failure::parsing_failed>;
 
+// TODO: consolidate this and curl_result at least into its own namespace, possibly
+// look to collapse some functionality as well.
+
 template <typename T>
 struct result {
   using error_type = std::variant<request_rejected, request_failed, parsing_failed>;

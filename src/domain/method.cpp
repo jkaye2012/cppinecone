@@ -1,0 +1,1 @@
+#include "pinecone/domain/method.hpp"
