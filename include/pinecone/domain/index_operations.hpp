@@ -68,4 +68,11 @@ struct operation_args<operation_type::collection_create>
       public types::parser<types::accepted> {
   using create_operation_args::create_operation_args;
 };
+
+template <>
+struct operation_args<operation_type::index_create>
+    : public create_operation_args<operation_type::index_create, types::new_index>,
+      public types::parser<types::accepted> {
+  using create_operation_args::create_operation_args;
+};
 }  // namespace pinecone::domain

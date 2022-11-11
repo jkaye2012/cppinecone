@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -199,5 +198,151 @@ struct new_collection {
  private:
   std::string _name;
   std::string _source;
+};
+
+struct new_index {
+  /**
+  {
+      "name": "example-index",
+      "dimension": 128,
+      "metric": "cosine",
+      "pods":1,
+      "pod_type": "p1",
+      "shards": 1,
+      "replicas": 1,
+      "metadata_config": {
+        "indexed": ["example-metadata-field"]
+      },
+      "source_collection": "example-collection"
+  }
+  */
+  struct builder {
+    builder(std::string name, uint32_t dimension) noexcept
+        : _name(std::move(name)), _dimension(dimension)
+    {
+    }
+
+    auto with_metric(std::string metric) noexcept -> builder&
+    {
+      _metric = std::move(metric);
+      return *this;
+    }
+
+    auto with_pods(uint16_t pods) noexcept -> builder&
+    {
+      _pods = pods;
+      return *this;
+    }
+
+    auto with_pod_type(std::string pod_type) noexcept -> builder&
+    {
+      _pod_type = std::move(pod_type);
+      return *this;
+    }
+
+    auto with_shards(uint16_t shards) noexcept -> builder&
+    {
+      _shards = shards;
+      return *this;
+    }
+
+    auto with_replicas(uint16_t replicas) noexcept -> builder&
+    {
+      _replicas = replicas;
+      return *this;
+    }
+
+    auto with_metadata_config(std::vector<std::string> indexed) noexcept -> builder&
+    {
+      _metadata_config = std::move(indexed);
+      return *this;
+    }
+
+    auto with_source_collection(std::string source_collection) noexcept -> builder&
+    {
+      _source_collection = std::move(source_collection);
+      return *this;
+    }
+
+    [[nodiscard]] auto build() noexcept -> new_index
+    {
+      return {std::move(_name),
+              _dimension,
+              std::move(_metric),
+              _pods,
+              std::move(_pod_type),
+              _shards,
+              _replicas,
+              std::move(_metadata_config),
+              std::move(_source_collection)};
+    }
+
+   private:
+    std::string _name;
+    uint32_t _dimension;
+    std::optional<std::string> _metric;
+    std::optional<uint16_t> _pods;
+    std::optional<std::string> _pod_type;
+    std::optional<uint16_t> _shards;
+    std::optional<uint16_t> _replicas;
+    std::optional<std::vector<std::string>> _metadata_config;
+    std::optional<std::string> _source_collection;
+  };
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"name", _name}, {"dimension", _dimension}};
+    if (_metric) {
+      repr["metric"] = *_metric;
+    }
+    if (_pods) {
+      repr["pods"] = *_pods;
+    }
+    if (_pod_type) {
+      repr["pod_type"] = *_pod_type;
+    }
+    if (_shards) {
+      repr["shards"] = *_shards;
+    }
+    if (_replicas) {
+      repr["replicas"] = *_replicas;
+    }
+    if (_metadata_config) {
+      repr["metadata_config"] = {{"indexed", *_metadata_config}};
+    }
+    if (_source_collection) {
+      repr["source_collection"] = *_source_collection;
+    }
+
+    return repr.dump();
+  };
+
+ private:
+  std::string _name;
+  uint16_t _dimension;
+  std::optional<std::string> _metric;  // TODO: could be made enum
+  std::optional<uint16_t> _pods;
+  std::optional<std::string> _pod_type;  // TODO: could be made enum
+  std::optional<uint16_t> _shards;
+  std::optional<uint16_t> _replicas;
+  std::optional<std::vector<std::string>> _metadata_config;
+  std::optional<std::string> _source_collection;
+
+  new_index(std::string name, uint32_t dimension, std::optional<std::string> metric,
+            std::optional<uint16_t> pods, std::optional<std::string> pod_type,
+            std::optional<uint16_t> shards, std::optional<uint16_t> replicas,
+            std::optional<std::vector<std::string>> metadata_config,
+            std::optional<std::string> source_collection) noexcept
+      : _name(std::move(name)),
+        _dimension(dimension),
+        _metric(std::move(metric)),
+        _pods(pods),
+        _pod_type(std::move(pod_type)),
+        _shards(shards),
+        _replicas(replicas),
+        _metadata_config(std::move(metadata_config)),
+        _source_collection(std::move(source_collection))
+  {
+  }
 };
 }  // namespace pinecone::types

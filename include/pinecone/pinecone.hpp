@@ -35,6 +35,11 @@ struct pinecone_client {
     return std::nullopt;
   }
 
+  [[nodiscard]] auto create_index(types::new_index index) const noexcept -> result<types::accepted>
+  {
+    return _http_client->request(args<type::index_create>{_url_builder, std::move(index)});
+  }
+
   [[nodiscard]] auto list_indexes() const noexcept -> result<types::indexes>
   {
     return _http_client->request(args<type::index_list>{_url_builder});
