@@ -16,7 +16,10 @@ int main(int argc, char** argv)
   std::cout << configure_result.to_string() << std::endl;
 
   // auto deleted = client->delete_collection("squad-test-collection");
-  // std::cout << "Deleted: " << *deleted << std::endl;
+  // std::cout << "Deleted: " << deleted.to_string() << std::endl;
+
+  // auto created = client->create_collection({"squad-test-collection", "squad"});
+  // std::cout << "Created: " << created.to_string() << std::endl;
 
   for (auto const& idx : indexes->names()) {
     std::cout << idx << std::endl;

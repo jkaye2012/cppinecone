@@ -56,16 +56,21 @@ struct [[nodiscard]] curl_result {
     return func();
   }
 
+  static auto to_string(error_type const& err) noexcept -> std::string
+  {
+    return std::visit(
+        util::overloaded{[](CURLcode arg) { return std::to_string(arg); },
+                         [](curl_slist*) -> std::string { return "Bad header list"; }},
+        err);
+  }
+
   [[nodiscard]] auto to_string() const noexcept -> std::string
   {
     switch (_value.index()) {
       case 0:
         return "Success";
       case 1:
-        return std::visit(
-            util::overloaded{[](CURLcode arg) { return std::to_string(arg); },
-                             [](curl_slist*) -> std::string { return "Bad header list"; }},
-            error());
+        return to_string(error());
       default:
         return "Unknown";
     }
@@ -74,4 +79,5 @@ struct [[nodiscard]] curl_result {
  private:
   std::variant<std::monostate, error_type> _value;
 };
+
 }  // namespace pinecone::domain

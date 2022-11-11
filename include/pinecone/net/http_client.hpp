@@ -55,7 +55,8 @@ struct connection_args {
 
 static constexpr size_t kInitialDataSize = 1024;
 static constexpr int64_t kHttpOk = 200;
-static constexpr size_t kHttpAccepted = 202;
+static constexpr int64_t kHttpCreated = 201;
+static constexpr int64_t kHttpAccepted = 202;
 
 /**
  * @brief An HTTP client responsible for making requests to a Pinecone
@@ -104,6 +105,7 @@ struct http_client<threading_mode::sync> {
     curl_easy_getinfo(_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
     switch (http_code) {
       case kHttpOk:
+      case kHttpCreated:
       case kHttpAccepted:
         try {
           return op_args.parse(_data);

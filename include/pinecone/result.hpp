@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <string>
 #include <variant>
 
@@ -135,18 +136,25 @@ struct result {
       return "success";
     }
 
-    // TODO: include more semantic information
+    std::ostringstream oss;
     auto const& err = std::get<error_type>(_value);
     switch (err.index()) {
       case 0:
-        return "request rejected";
+        oss << "Request rejected: "
+            << domain::curl_result::to_string(std::get<request_rejected>(err).curl_error());
+        break;
       case 1:
-        return "request failed";
+        oss << "Request failed: " << std::get<request_failed>(err).response_code() << " "
+            << std::get<request_failed>(err).body();
+        break;
       case 2:
-        return "parsing failed";
+        oss << "Parsing failed: " << std::get<parsing_failed>(err).exception().what();
+        break;
       default:
         return "unknown";
     }
+
+    return oss.str();
   }
 
   [[nodiscard]] constexpr auto is_successful() const noexcept -> bool

@@ -23,6 +23,7 @@ struct arg_base {
 
   [[nodiscard]] constexpr auto url() const noexcept -> char const* { return _url.c_str(); }
 
+  // TODO: can probably delete this function entirely
   // NOLINTNEXTLINE
   virtual auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
   {
@@ -66,6 +67,19 @@ struct patch_operation_args : public arg_base {
   patch_operation_args(net::url_builder& url_builder, std::string_view resource_name,
                        Body body) noexcept
       : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
+  {
+  }
+
+  [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
+
+ private:
+  std::string _body;
+};
+
+template <operation_type op, typename Body>
+struct create_operation_args : public arg_base {
+  create_operation_args(net::url_builder& url_builder, Body body) noexcept
+      : arg_base(url_builder.build(op)), _body(body.serialize())
   {
   }
 
@@ -125,6 +139,11 @@ struct operation {
       return domain::curl_result(curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kPatch))
           .and_then(
               [this, curl]() { return curl_easy_setopt(curl, CURLOPT_POSTFIELDS, _args.body()); });
+    }
+    if constexpr (op_method(op_type) == method::post) {
+      return domain::curl_result(curl_easy_setopt(curl, CURLOPT_POST, 1L)).and_then([this, curl]() {
+        return curl_easy_setopt(curl, CURLOPT_POSTFIELDS, _args.body());
+      });
     }
 
     return {};

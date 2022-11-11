@@ -182,4 +182,22 @@ struct index_configuration {
   uint16_t _replicas;
   std::string _pod_type;  // TODO: could be made enum
 };
+
+struct new_collection {
+  new_collection(std::string name, std::string source) noexcept
+      : _name(std::move(name)), _source(std::move(source))
+  {
+  }
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"name", _name}, {"source", _source}};
+
+    return repr.dump();
+  }
+
+ private:
+  std::string _name;
+  std::string _source;
+};
 }  // namespace pinecone::types

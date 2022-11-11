@@ -77,6 +77,13 @@ struct pinecone_client {
     return _http_client->request(args<type::collection_delete>{_url_builder, name});
   }
 
+  [[nodiscard]] auto create_collection(types::new_collection collection) const noexcept
+      -> result<types::accepted>
+  {
+    return _http_client->request(
+        args<type::collection_create>(_url_builder, std::move(collection)));
+  }
+
  private:
   mutable net::url_builder _url_builder;
   mutable std::unique_ptr<net::http_client<Mode>> _http_client;
