@@ -10,6 +10,7 @@
 #include "pinecone/net/http_client.hpp"
 #include "pinecone/net/url_builder.hpp"
 #include "pinecone/result.hpp"
+#include "pinecone/types/accepted.hpp"
 #include "pinecone/types/index_types.hpp"
 
 namespace pinecone
@@ -48,13 +49,13 @@ struct pinecone_client {
 
   [[nodiscard]] auto configure_index(std::string const& name,
                                      types::index_configuration config) const noexcept
-      -> result<std::string>
+      -> result<types::accepted>
   {
     return _http_client->request(
         args<type::index_configure>(_url_builder, name, std::move(config)));
   }
 
-  [[nodiscard]] auto delete_index(std::string const& name) const noexcept -> result<std::string>
+  [[nodiscard]] auto delete_index(std::string const& name) const noexcept -> result<types::accepted>
   {
     return _http_client->request(args<type::index_delete>{_url_builder, name});
   }
@@ -71,7 +72,7 @@ struct pinecone_client {
   }
 
   [[nodiscard]] auto delete_collection(std::string const& name) const noexcept
-      -> result<std::string>
+      -> result<types::accepted>
   {
     return _http_client->request(args<type::collection_delete>{_url_builder, name});
   }

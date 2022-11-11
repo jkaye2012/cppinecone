@@ -106,7 +106,7 @@ struct http_client<threading_mode::sync> {
       case kHttpOk:
       case kHttpAccepted:
         try {
-          return domain::operation_args<Op>::parser(_data);
+          return op_args.parse(_data);
         } catch (json::exception& ex) {
           return {std::move(ex)};
         }
