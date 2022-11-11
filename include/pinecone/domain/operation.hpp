@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <string>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -41,20 +42,37 @@ struct list_operation_args : public arg_base {
 };
 
 template <operation_type op>
+[[nodiscard]] inline auto build_url(net::url_builder& url_builder,
+                                    std::string_view resource_name) noexcept -> std::string
+{
+  std::ostringstream oss;
+  oss << url_builder.build(op) << resource_name;
+  return oss.str();
+}
+
+// TODO: rename (unary_read_operation?)
+template <operation_type op>
 struct describe_delete_operation_args : public arg_base {
   describe_delete_operation_args(net::url_builder& url_builder,
                                  std::string_view resource_name) noexcept
-      : arg_base(build_url(url_builder, resource_name))
+      : arg_base(build_url<op>(url_builder, resource_name))
+  {
+  }
+};
+
+// TODO: rename (unary_update_operation?)
+template <operation_type op, typename Body>
+struct patch_operation_args : public arg_base {
+  patch_operation_args(net::url_builder& url_builder, std::string_view resource_name,
+                       Body body) noexcept
+      : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
   {
   }
 
-  [[nodiscard]] static auto build_url(net::url_builder& url_builder,
-                                      std::string_view resource_name) noexcept -> std::string
-  {
-    std::ostringstream oss;
-    oss << url_builder.build(op) << resource_name;
-    return oss.str();
-  }
+  [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
+
+ private:
+  std::string _body;
 };
 
 template <operation_type>
@@ -62,6 +80,7 @@ struct operation_args;
 
 static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
 static constexpr auto kDelete = "DELETE";
+static constexpr auto kPatch = "PATCH";
 
 /**
  * @brief Data common to all Pinecone API operation types.
@@ -101,6 +120,11 @@ struct operation {
   {
     if constexpr (op_method(op_type) == method::del) {
       return {curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kDelete)};
+    }
+    if constexpr (op_method(op_type) == method::patch) {
+      return domain::curl_result(curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kPatch))
+          .and_then(
+              [this, curl]() { return curl_easy_setopt(curl, CURLOPT_POSTFIELDS, _args.body()); });
     }
 
     return {};

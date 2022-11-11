@@ -12,6 +12,9 @@ int main(int argc, char** argv)
   auto collections = client->list_collections();
   std::cout << "Num collections: " << collections->names().size() << std::endl;
 
+  auto configure_result = client->configure_index("squad", {1, "s1"});
+  std::cout << configure_result.to_string() << std::endl;
+
   // auto deleted = client->delete_collection("squad-test-collection");
   // std::cout << "Deleted: " << *deleted << std::endl;
 

@@ -21,6 +21,8 @@ using json = nlohmann::json;
 
 namespace pinecone::net
 {
+// TODO: move mode and connection args to top-level namespace
+
 /**
    @brief Threading behaviors supported by `http_client`.
 */
@@ -104,7 +106,7 @@ struct http_client<threading_mode::sync> {
       case kHttpOk:
       case kHttpAccepted:
         try {
-          return domain::operation_args<Op>::parser(json::parse(_data));
+          return domain::operation_args<Op>::parser(_data);
         } catch (json::exception& ex) {
           return {std::move(ex)};
         }

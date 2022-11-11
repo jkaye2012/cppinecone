@@ -164,4 +164,22 @@ struct list {
 };
 using indexes = list;
 using collections = list;
+
+struct index_configuration {
+  index_configuration(uint16_t replicas, std::string pod_type) noexcept
+      : _replicas(replicas), _pod_type(std::move(pod_type))
+  {
+  }
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"replicas", _replicas}, {"pod_type", _pod_type}};
+
+    return repr.dump();
+  }
+
+ private:
+  uint16_t _replicas;
+  std::string _pod_type;  // TODO: could be made enum
+};
 }  // namespace pinecone::types

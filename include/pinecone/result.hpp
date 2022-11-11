@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <variant>
 
 #include <curl/curl.h>
@@ -113,15 +114,38 @@ struct result {
 
   [[nodiscard]] constexpr auto failure_reason() const noexcept -> failure
   {
-    switch (_value.index()) {
+    if (_value.index() == 0) {
+      return failure::none;
+    }
+
+    auto const& err = std::get<error_type>(_value);
+    switch (err.index()) {
       case 0:
-        return failure::none;
-      case 1:
         return failure::request_rejected;
-      case 2:
+      case 1:
         return failure::request_failed;
-      case 3:
+      case 2:
         return failure::parsing_failed;
+    }
+  }
+
+  [[nodiscard]] auto to_string() const noexcept -> std::string
+  {
+    if (_value.index() == 0) {
+      return "success";
+    }
+
+    // TODO: include more semantic information
+    auto const& err = std::get<error_type>(_value);
+    switch (err.index()) {
+      case 0:
+        return "request rejected";
+      case 1:
+        return "request failed";
+      case 2:
+        return "parsing failed";
+      default:
+        return "unknown";
     }
   }
 
