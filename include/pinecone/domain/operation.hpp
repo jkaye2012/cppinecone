@@ -36,14 +36,14 @@ struct arg_base {
 
 template <operation_type op>
 struct list_operation_args : public arg_base {
-  explicit list_operation_args(net::url_builder& url_builder) noexcept
+  explicit list_operation_args(net::url_builder const& url_builder) noexcept
       : arg_base(url_builder.build<op>())
   {
   }
 };
 
 template <operation_type op>
-[[nodiscard]] inline auto build_url(net::url_builder& url_builder,
+[[nodiscard]] inline auto build_url(net::url_builder const& url_builder,
                                     std::string_view resource_name) noexcept -> std::string
 {
   if constexpr (op_api_type(op) == api_type::service) {
@@ -58,7 +58,7 @@ template <operation_type op>
 // TODO: rename (unary_read_operation?)
 template <operation_type op>
 struct describe_delete_operation_args : public arg_base {
-  describe_delete_operation_args(net::url_builder& url_builder,
+  describe_delete_operation_args(net::url_builder const& url_builder,
                                  std::string_view resource_name) noexcept
       : arg_base(build_url<op>(url_builder, resource_name))
   {
@@ -68,7 +68,7 @@ struct describe_delete_operation_args : public arg_base {
 // TODO: rename (unary_update_operation?)
 template <operation_type op, typename Body>
 struct patch_operation_args : public arg_base {
-  patch_operation_args(net::url_builder& url_builder, std::string_view resource_name,
+  patch_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
                        Body body) noexcept
       : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
   {
@@ -83,7 +83,7 @@ struct patch_operation_args : public arg_base {
 // TODO: rename, not used only for creation
 template <operation_type op, typename Body>
 struct create_operation_args : public arg_base {
-  create_operation_args(net::url_builder& url_builder, Body body) noexcept
+  create_operation_args(net::url_builder const& url_builder, Body body) noexcept
       : arg_base(url_builder.build<op>()), _body(body.serialize())
   {
   }
@@ -96,7 +96,7 @@ struct create_operation_args : public arg_base {
 
 template <operation_type op, typename Body>
 struct vector_operation_args : public arg_base {
-  vector_operation_args(net::url_builder& url_builder, std::string_view resource_name,
+  vector_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
                         Body body) noexcept
       : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
   {

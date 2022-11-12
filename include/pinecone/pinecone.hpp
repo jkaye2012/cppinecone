@@ -110,7 +110,7 @@ struct pinecone_client {
   }
 
  private:
-  mutable net::url_builder _url_builder;
+  net::url_builder _url_builder;
   mutable std::unique_ptr<net::http_client<Mode>> _http_client;
 
   pinecone_client(net::url_builder url_builder,
