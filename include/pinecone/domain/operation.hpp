@@ -6,10 +6,10 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-#include "pinecone/domain/curl_result.hpp"
 #include "pinecone/domain/method.hpp"
 #include "pinecone/domain/operation_type.hpp"
 #include "pinecone/net/url_builder.hpp"
+#include "pinecone/util/curl_result.hpp"
 
 namespace pinecone::domain
 {
@@ -22,13 +22,6 @@ struct arg_base {
   auto operator=(arg_base&&) noexcept -> arg_base& = default;
 
   [[nodiscard]] constexpr auto url() const noexcept -> char const* { return _url.c_str(); }
-
-  // TODO: can probably delete this function entirely
-  // NOLINTNEXTLINE
-  virtual auto set_opts(CURL* curl, curl_slist* headers) noexcept -> domain::curl_result
-  {
-    return {};
-  }
 
  private:
   std::string _url;
@@ -55,7 +48,6 @@ template <operation_type op>
   }
 }
 
-// TODO: rename (unary_read_operation?)
 template <operation_type op>
 struct describe_delete_operation_args : public arg_base {
   describe_delete_operation_args(net::url_builder const& url_builder,
@@ -65,7 +57,6 @@ struct describe_delete_operation_args : public arg_base {
   }
 };
 
-// TODO: rename (unary_update_operation?)
 template <operation_type op, typename Body>
 struct patch_operation_args : public arg_base {
   patch_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
@@ -80,7 +71,6 @@ struct patch_operation_args : public arg_base {
   std::string _body;
 };
 
-// TODO: rename, not used only for creation
 template <operation_type op, typename Body>
 struct create_operation_args : public arg_base {
   create_operation_args(net::url_builder const& url_builder, Body body) noexcept
@@ -111,7 +101,6 @@ struct vector_operation_args : public arg_base {
 template <operation_type>
 struct operation_args;
 
-static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
 static constexpr auto kDelete = "DELETE";
 static constexpr auto kPatch = "PATCH";
 
@@ -120,47 +109,38 @@ static constexpr auto kPatch = "PATCH";
  */
 template <operation_type Op>
 struct operation {
-  operation(operation_args<Op> args, std::string api_key) noexcept
-      : _args(std::move(args)), _api_key(std::move(api_key)), _method(op_method(op_type))
+  explicit operation(operation_args<Op> args) noexcept
+      : _args(std::move(args)), _method(op_method(op_type))
   {
   }
 
   static constexpr auto op_type = Op;
 
-  // TODO: might be able to re-use headers across all requests
-  ~operation() noexcept { curl_slist_free_all(_headers); }
-  operation(operation const&) = delete;
-  auto operator=(operation const&) = delete;
-  operation(operation&&) noexcept = delete;
-  auto operator=(operation&&) noexcept = delete;
-
   [[nodiscard]] constexpr auto method() const noexcept { return _method; }
-  [[nodiscard]] constexpr auto api_key() const noexcept { return _api_key; }
 
-  constexpr auto set_opts(CURL* curl) noexcept -> domain::curl_result
+  constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> util::curl_result
   {
     curl_easy_reset(curl);
 
     return set_method_opts(curl)
-        .and_then([this]() { return set_header_value(_api_key.c_str()); })
-        .and_then([this]() { return set_header_value(kContentType); })
         .and_then([this, curl]() { return curl_easy_setopt(curl, CURLOPT_URL, _args.url()); })
-        .and_then([this, curl]() { return _args.set_opts(curl, _headers); })
-        .and_then([this, curl]() { return curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers); });
+        .and_then([this, curl, headers]() {
+          return curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        });
   }
 
-  constexpr auto set_method_opts(CURL* curl) noexcept -> domain::curl_result
+  constexpr auto set_method_opts(CURL* curl) noexcept -> util::curl_result
   {
     if constexpr (op_method(op_type) == method::del) {
       return {curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kDelete)};
     }
     if constexpr (op_method(op_type) == method::patch) {
-      return domain::curl_result(curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kPatch))
+      return util::curl_result(curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kPatch))
           .and_then(
               [this, curl]() { return curl_easy_setopt(curl, CURLOPT_POSTFIELDS, _args.body()); });
     }
     if constexpr (op_method(op_type) == method::post) {
-      return domain::curl_result(curl_easy_setopt(curl, CURLOPT_POST, 1L)).and_then([this, curl]() {
+      return util::curl_result(curl_easy_setopt(curl, CURLOPT_POST, 1L)).and_then([this, curl]() {
         return curl_easy_setopt(curl, CURLOPT_POSTFIELDS, _args.body());
       });
     }
@@ -170,15 +150,6 @@ struct operation {
 
  private:
   operation_args<Op> _args;
-  std::string _api_key;
   domain::method _method;
-
-  curl_slist* _headers{};
-
-  constexpr auto set_header_value(char const* header) noexcept -> curl_result
-  {
-    _headers = curl_slist_append(_headers, header);
-    return _headers;
-  }
 };
 }  // namespace pinecone::domain

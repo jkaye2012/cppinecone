@@ -7,7 +7,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "pinecone/result.hpp"
+#include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
 
@@ -88,7 +88,7 @@ struct database {
   [[nodiscard]] constexpr auto shards() const noexcept -> uint16_t { return _shards; }
   [[nodiscard]] constexpr auto status() const noexcept -> database_status const& { return _status; }
 
-  static auto build(json api_result) -> result<database>
+  static auto build(json api_result) -> util::result<database>
   {
     auto status = database_status::build(api_result["status"]);
     auto json_db = api_result["database"];
@@ -125,7 +125,7 @@ struct collection {
   [[nodiscard]] auto size() const noexcept -> uint64_t { return _size; }
   [[nodiscard]] auto status() const noexcept -> std::string { return _status; }
 
-  static auto build(json api_result) -> result<collection>
+  static auto build(json api_result) -> util::result<collection>
   {
     return collection(api_result["name"], api_result["size"], api_result["status"]);
   }
@@ -142,7 +142,7 @@ struct collection {
 };
 
 struct list {
-  static auto build(json api_result) -> result<list>
+  static auto build(json api_result) -> util::result<list>
   {
     std::vector<std::string> names;
     names.reserve(api_result.size());

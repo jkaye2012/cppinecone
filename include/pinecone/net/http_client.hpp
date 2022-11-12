@@ -14,44 +14,13 @@
 #include "pinecone/domain/method.hpp"
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"
-#include "pinecone/result.hpp"
+#include "pinecone/net/arguments.hpp"
+#include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
 
 namespace pinecone::net
 {
-// TODO: move mode and connection args to top-level namespace
-
-/**
-   @brief Threading behaviors supported by `http_client`.
-*/
-enum class threading_mode {
-  /** @brief Synchronous operation; in this mode, `http_client` instances are
-   *   _not_ thread-safe.
-   */
-  sync
-};
-
-struct connection_args {
-  connection_args(std::string environment, std::string api_key) noexcept
-      : _environment(std::move(environment)), _api_key(std::move(api_key))
-  {
-  }
-
-  [[nodiscard]] auto environment() const noexcept -> std::string const& { return _environment; }
-
-  [[nodiscard]] auto api_key() const noexcept -> std::string const& { return _api_key; }
-
-  [[nodiscard]] auto api_key_header() const noexcept -> std::string
-  {
-    return "Api-Key: " + _api_key;
-  }
-
- private:
-  std::string _environment;
-  std::string _api_key;
-};
-
 static constexpr size_t kInitialDataSize = 1024;
 static constexpr int64_t kHttpOk = 200;
 static constexpr int64_t kHttpCreated = 201;
@@ -64,31 +33,44 @@ static constexpr int64_t kHttpAccepted = 202;
 template <threading_mode Mode>
 struct http_client;
 
+static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
+
 template <>
 struct http_client<threading_mode::sync> {
   static auto build(connection_args args) noexcept -> std::unique_ptr<http_client>
   {
     auto* curl_handle = curl_easy_init();
-    return curl_handle != nullptr ? std::unique_ptr<http_client>(
-                                        new http_client(std::move(args), curl_handle))  // NOLINT
+    curl_slist* headers{};
+    headers = curl_slist_append(headers, kContentType);
+    headers = curl_slist_append(headers, args.api_key_header());
+    if (headers == nullptr) {
+      return nullptr;
+    }
+    return curl_handle != nullptr ? std::unique_ptr<http_client>(new http_client(
+                                        std::move(args), curl_handle, headers))  // NOLINT
                                   : nullptr;
   }
 
-  ~http_client() noexcept { curl_easy_cleanup(_curl_handle); }
+  ~http_client() noexcept
+  {
+    curl_easy_cleanup(_curl_handle);
+    curl_slist_free_all(_headers);
+  }
+
   http_client(http_client const&) = delete;
   auto operator=(http_client const&) -> http_client& = delete;
   http_client(http_client&&) noexcept = default;
   auto operator=(http_client&&) noexcept -> http_client& = default;
 
   template <domain::operation_type Op>
-  auto request(domain::operation_args<Op> op_args) noexcept
-      -> result<typename domain::operation_args<Op>::parsed_type>
+  auto request(domain::operation_args<Op> op_args) const noexcept
+      -> util::result<typename domain::operation_args<Op>::parsed_type>
   {
-    domain::operation<Op> operation(std::move(op_args), _api_key_header);
+    domain::operation<Op> operation(std::move(op_args));
     _data.clear();
     auto result =
         operation
-            .set_opts(_curl_handle)
+            .set_opts(_curl_handle, _headers)
             // .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_VERBOSE, 1L); })
             // // TODO: dynamically enable?
             .and_then([this]() {
@@ -136,11 +118,11 @@ struct http_client<threading_mode::sync> {
  private:
   connection_args _args;
   CURL* _curl_handle;
-  std::string _api_key_header;
-  std::vector<uint8_t> _data;
+  curl_slist* _headers;
+  mutable std::vector<uint8_t> _data;
 
-  http_client(connection_args args, CURL* curl_handle) noexcept
-      : _args(std::move(args)), _curl_handle(curl_handle), _api_key_header(_args.api_key_header())
+  http_client(connection_args args, CURL* curl_handle, curl_slist* headers) noexcept
+      : _args(std::move(args)), _curl_handle(curl_handle), _headers(headers)
   {
     assert(_curl_handle != nullptr);
     _data.reserve(kInitialDataSize);

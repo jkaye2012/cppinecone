@@ -8,7 +8,7 @@
 
 #include "pinecone/util/visit.hpp"
 
-namespace pinecone::domain
+namespace pinecone::util
 {
 /**
  * Models the possibly of failure for API operations.
@@ -80,4 +80,4 @@ struct [[nodiscard]] curl_result {
   std::variant<std::monostate, error_type> _value;
 };
 
-}  // namespace pinecone::domain
+}  // namespace pinecone::util

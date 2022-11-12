@@ -41,16 +41,24 @@ include_directories(
 
 add_library(cppinecone STATIC
   src/pinecone.cpp
-  src/result.cpp
-  src/domain/curl_result.cpp
   src/domain/index_operations.cpp
+  src/domain/meta_operations.cpp
   src/domain/method.cpp
   src/domain/operation.cpp
   src/domain/operation_type.cpp
-  src/types/index_types.cpp
-  src/util/visit.cpp
+  src/domain/vector_operations.cpp
+  src/net/arguments.cpp
   src/net/http_client.cpp
   src/net/url_builder.cpp
+  src/types/accepted.cpp
+  src/types/api_metadata.cpp
+  src/types/index_types.cpp
+  src/types/parser.cpp
+  src/types/vector_metadata.cpp
+  src/types/vector_types.cpp
+  src/util/curl_result.cpp
+  src/util/result.cpp
+  src/util/visit.cpp
 )
 
 target_link_libraries(cppinecone PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohmann_json)

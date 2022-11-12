@@ -6,7 +6,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "pinecone/result.hpp"
+#include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
 
@@ -22,7 +22,7 @@ struct index_stats {
     uint64_t _vector_count;
   };
 
-  static auto build(json api_result) -> result<index_stats>
+  static auto build(json api_result) -> util::result<index_stats>
   {
     std::unordered_map<std::string, namespace_summary> namespaces;
     for (auto const& ns : api_result["namespaces"].items()) {

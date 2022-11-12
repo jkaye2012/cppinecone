@@ -7,11 +7,11 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
-#include "pinecone/domain/curl_result.hpp"
+#include "pinecone/util/curl_result.hpp"
 
 using json = nlohmann::json;
 
-namespace pinecone
+namespace pinecone::util
 {
 /**
  * @brief The possible ways in which a Pinecone API call can fail.
@@ -53,17 +53,15 @@ struct failure_reason {
 
 template <>
 struct failure_reason<failure::request_rejected> {
-  explicit constexpr failure_reason(domain::curl_result::error_type err) noexcept : _curl_err(err)
-  {
-  }
+  explicit constexpr failure_reason(curl_result::error_type err) noexcept : _curl_err(err) {}
 
-  [[nodiscard]] constexpr auto curl_error() const noexcept -> domain::curl_result::error_type
+  [[nodiscard]] constexpr auto curl_error() const noexcept -> curl_result::error_type
   {
     return _curl_err;
   }
 
  private:
-  domain::curl_result::error_type _curl_err;
+  curl_result::error_type _curl_err;
 };
 using request_rejected = failure_reason<failure::request_rejected>;
 
@@ -94,9 +92,6 @@ struct failure_reason<failure::parsing_failed> {
 };
 using parsing_failed = failure_reason<failure::parsing_failed>;
 
-// TODO: consolidate this and curl_result at least into its own namespace, possibly
-// look to collapse some functionality as well.
-
 template <typename T>
 struct result {
   using error_type = std::variant<request_rejected, request_failed, parsing_failed>;
@@ -105,7 +100,7 @@ struct result {
   // NOLINTNEXTLINE
   result(T value) noexcept : _value(std::move(value)) {}
   // NOLINTNEXTLINE
-  result(domain::curl_result::error_type err) noexcept : _value(request_rejected(err)) {}
+  result(curl_result::error_type err) noexcept : _value(request_rejected(err)) {}
   // NOLINTNEXTLINE
   result(int64_t code, std::string body) noexcept : _value(request_failed(code, std::move(body))) {}
   // NOLINTNEXTLINE
@@ -141,7 +136,7 @@ struct result {
     switch (err.index()) {
       case 0:
         oss << "Request rejected: "
-            << domain::curl_result::to_string(std::get<request_rejected>(err).curl_error());
+            << curl_result::to_string(std::get<request_rejected>(err).curl_error());
         break;
       case 1:
         oss << "Request failed: " << std::get<request_failed>(err).response_code() << " "
@@ -188,4 +183,4 @@ struct result {
  private:
   value_type _value;
 };
-}  // namespace pinecone
+}  // namespace pinecone::util

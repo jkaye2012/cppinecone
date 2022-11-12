@@ -4,11 +4,11 @@
 #include <string_view>
 #include <vector>
 
-#include "pinecone/result.hpp"
+#include "pinecone/util/result.hpp"
 namespace pinecone::types
 {
 struct accepted {
-  static auto build(std::vector<uint8_t>& data) noexcept -> result<accepted>
+  static auto build(std::vector<uint8_t>& data) noexcept -> util::result<accepted>
   {
     return {accepted(data)};
   }

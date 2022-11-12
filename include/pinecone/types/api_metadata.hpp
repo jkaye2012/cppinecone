@@ -4,14 +4,14 @@
 
 #include <nlohmann/json.hpp>
 
-#include "pinecone/result.hpp"
+#include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
 
 namespace pinecone::types
 {
 struct api_metadata {
-  [[nodiscard]] static auto build(json api_result) -> result<api_metadata>
+  [[nodiscard]] static auto build(json api_result) -> util::result<api_metadata>
   {
     return api_metadata(api_result["project_name"], api_result["user_label"],
                         api_result["user_name"]);
