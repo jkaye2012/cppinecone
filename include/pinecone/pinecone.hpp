@@ -15,6 +15,7 @@
 #include "pinecone/types/accepted.hpp"
 #include "pinecone/types/api_metadata.hpp"
 #include "pinecone/types/index_types.hpp"
+#include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/types/vector_types.hpp"
 
 namespace pinecone
@@ -111,6 +112,7 @@ struct pinecone_client {
 
  private:
   net::url_builder _url_builder;
+  // TODO: consider interior mutability
   mutable std::unique_ptr<net::http_client<Mode>> _http_client;
 
   pinecone_client(net::url_builder url_builder,

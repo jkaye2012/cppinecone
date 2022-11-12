@@ -4,6 +4,7 @@
 #include "pinecone/domain/operation_type.hpp"
 #include "pinecone/types/accepted.hpp"
 #include "pinecone/types/parser.hpp"
+#include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/types/vector_types.hpp"
 
 namespace pinecone::domain

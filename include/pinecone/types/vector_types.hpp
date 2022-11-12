@@ -12,27 +12,6 @@ using json = nlohmann::json;
 
 namespace pinecone::types
 {
-// struct new_collection {
-//   new_collection(std::string name, std::string source) noexcept
-//       : _name(std::move(name)), _source(std::move(source))
-//   {
-//   }
-
-//   [[nodiscard]] auto serialize() const noexcept -> std::string
-//   {
-//     json repr = {{"name", _name}, {"source", _source}};
-
-//     return repr.dump();
-//   }
-
-//  private:
-//   std::string _name;
-//   std::string _source;
-// };
-struct metadata_filter {
-  [[nodiscard]] auto serialize() const noexcept -> std::string { return "{ \"filter\": {} }"; }
-};
-
 struct index_stats {
   struct namespace_summary {
     explicit namespace_summary(uint64_t vector_count) noexcept : _vector_count(vector_count) {}
