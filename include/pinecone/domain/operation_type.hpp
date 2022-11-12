@@ -1,6 +1,7 @@
 #pragma once
 
-#include "method.hpp"
+#include "pinecone/domain/method.hpp"
+
 namespace pinecone::domain
 { /**
    * @brief All operation_types exposed by the Pinecone REST API.
@@ -13,6 +14,8 @@ namespace pinecone::domain
    * - Vector operation_types
    */
 enum class operation_type {
+  actions_whoami,
+
   index_create,
   index_configure,
   index_list,
@@ -28,14 +31,55 @@ enum class operation_type {
   vector_update,
   vector_query,
   vector_fetch,
-  vector_describe_all_index_stats,
-  vector_describe_filtered_index_stats,
+  vector_describe_index_stats,
   vector_delete
 };
+
+/**
+ * @brief The API types supported by the Pinecone REST API.
+ *
+ * @details
+ * The Pinecone API is structured as two basic APIs:
+ *
+ * - The controller API, which allows users to create, configure, and delete indexes and collections
+ * - The vector API, which allows users to upsert, update, query, and delete vectors
+ *
+ * Each `operation_type` is associated with one of these two APIs.
+ */
+enum class api_type {
+  controller,
+  service
+};
+
+constexpr auto op_api_type(operation_type op) -> api_type
+{
+  switch (op) {
+    case operation_type::actions_whoami:
+    case operation_type::index_create:
+    case operation_type::index_list:
+    case operation_type::index_configure:
+    case operation_type::index_describe:
+    case operation_type::index_delete:
+    case operation_type::collection_create:
+    case operation_type::collection_list:
+    case operation_type::collection_describe:
+    case operation_type::collection_delete:
+      return api_type::controller;
+    case operation_type::vector_upsert:
+    case operation_type::vector_update:
+    case operation_type::vector_query:
+    case operation_type::vector_fetch:
+    case operation_type::vector_describe_index_stats:
+    case operation_type::vector_delete:
+      return api_type::service;
+  }
+}
 
 constexpr auto op_url_fragment(operation_type op) -> char const*
 {
   switch (op) {
+    case operation_type::actions_whoami:
+      return "/actions/whoami";
     case operation_type::index_create:
     case operation_type::index_list:
       return "/databases";
@@ -57,8 +101,7 @@ constexpr auto op_url_fragment(operation_type op) -> char const*
       return "/query";
     case operation_type::vector_fetch:
       return "/vectors/fetch";
-    case operation_type::vector_describe_all_index_stats:
-    case operation_type::vector_describe_filtered_index_stats:
+    case operation_type::vector_describe_index_stats:
       return "/describe_index_stats";
     case operation_type::vector_delete:
       return "/vectors/delete";
@@ -73,15 +116,15 @@ constexpr auto op_method(operation_type op) -> method
     case operation_type::vector_upsert:
     case operation_type::vector_update:
     case operation_type::vector_query:
-    case operation_type::vector_describe_filtered_index_stats:
+    case operation_type::vector_describe_index_stats:
     case operation_type::vector_delete:
       return method::post;
+    case operation_type::actions_whoami:
     case operation_type::index_list:
     case operation_type::index_describe:
     case operation_type::collection_list:
     case operation_type::collection_describe:
     case operation_type::vector_fetch:
-    case operation_type::vector_describe_all_index_stats:
       return method::get;
     case operation_type::index_configure:
       return method::patch;

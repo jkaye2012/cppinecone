@@ -201,21 +201,6 @@ struct new_collection {
 };
 
 struct new_index {
-  /**
-  {
-      "name": "example-index",
-      "dimension": 128,
-      "metric": "cosine",
-      "pods":1,
-      "pod_type": "p1",
-      "shards": 1,
-      "replicas": 1,
-      "metadata_config": {
-        "indexed": ["example-metadata-field"]
-      },
-      "source_collection": "example-collection"
-  }
-  */
   struct builder {
     builder(std::string name, uint32_t dimension) noexcept
         : _name(std::move(name)), _dimension(dimension)

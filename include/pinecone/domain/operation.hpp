@@ -37,7 +37,7 @@ struct arg_base {
 template <operation_type op>
 struct list_operation_args : public arg_base {
   explicit list_operation_args(net::url_builder& url_builder) noexcept
-      : arg_base(url_builder.build(op))
+      : arg_base(url_builder.build<op>())
   {
   }
 };
@@ -46,9 +46,13 @@ template <operation_type op>
 [[nodiscard]] inline auto build_url(net::url_builder& url_builder,
                                     std::string_view resource_name) noexcept -> std::string
 {
-  std::ostringstream oss;
-  oss << url_builder.build(op) << resource_name;
-  return oss.str();
+  if constexpr (op_api_type(op) == api_type::service) {
+    return url_builder.build<op>(resource_name);
+  } else if constexpr (op_api_type(op) == api_type::controller) {
+    std::ostringstream oss;
+    oss << url_builder.build<op>() << resource_name;
+    return oss.str();
+  }
 }
 
 // TODO: rename (unary_read_operation?)
@@ -76,10 +80,25 @@ struct patch_operation_args : public arg_base {
   std::string _body;
 };
 
+// TODO: rename, not used only for creation
 template <operation_type op, typename Body>
 struct create_operation_args : public arg_base {
   create_operation_args(net::url_builder& url_builder, Body body) noexcept
-      : arg_base(url_builder.build(op)), _body(body.serialize())
+      : arg_base(url_builder.build<op>()), _body(body.serialize())
+  {
+  }
+
+  [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
+
+ private:
+  std::string _body;
+};
+
+template <operation_type op, typename Body>
+struct vector_operation_args : public arg_base {
+  vector_operation_args(net::url_builder& url_builder, std::string_view resource_name,
+                        Body body) noexcept
+      : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
   {
   }
 

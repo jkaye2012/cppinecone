@@ -5,13 +5,17 @@
 #include <string>
 
 #include "pinecone/domain/index_operations.hpp"
+#include "pinecone/domain/meta_operations.hpp"
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"
+#include "pinecone/domain/vector_operations.hpp"
 #include "pinecone/net/http_client.hpp"
 #include "pinecone/net/url_builder.hpp"
 #include "pinecone/result.hpp"
 #include "pinecone/types/accepted.hpp"
+#include "pinecone/types/api_metadata.hpp"
 #include "pinecone/types/index_types.hpp"
+#include "pinecone/types/vector_types.hpp"
 
 namespace pinecone
 {
@@ -29,10 +33,21 @@ struct pinecone_client {
     net::url_builder url_builder(args.environment());
     auto client = net::http_client<Mode>::build(std::move(args));
     if (client) {
+      auto api_metadata = client->request(
+          domain::operation_args<domain::operation_type::actions_whoami>(url_builder));
+      if (api_metadata.is_failed()) {
+        return std::nullopt;
+      }
+      url_builder.set_metadata(std::move(*api_metadata));
       return pinecone_client(std::move(url_builder), std::move(client));
     }
 
     return std::nullopt;
+  }
+
+  [[nodiscard]] auto get_api_metdata() const noexcept -> result<types::api_metadata>
+  {
+    return _http_client->request(args<type::actions_whoami>{_url_builder});
   }
 
   [[nodiscard]] auto create_index(types::new_index index) const noexcept -> result<types::accepted>
@@ -87,6 +102,11 @@ struct pinecone_client {
   {
     return _http_client->request(
         args<type::collection_create>(_url_builder, std::move(collection)));
+  }
+
+  [[nodiscard]] auto describe_index_stats(std::string const& name) const noexcept
+  {
+    return _http_client->request(args<type::vector_describe_index_stats>{_url_builder, name, {}});
   }
 
  private:

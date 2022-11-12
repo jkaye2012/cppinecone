@@ -1,16 +1,10 @@
 #pragma once
 
-#include <functional>
-
-#include <nlohmann/json.hpp>
-
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"
 #include "pinecone/types/accepted.hpp"
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/parser.hpp"
-
-using json = nlohmann::json;
 
 namespace pinecone::domain
 {
