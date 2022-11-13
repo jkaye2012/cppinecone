@@ -1,7 +1,9 @@
+#include <array>
 #include <iostream>
 
 #include "pinecone/pinecone.hpp"
 #include "pinecone/types/index_types.hpp"
+#include "pinecone/types/vector_metadata.hpp"
 
 int main(int argc, char** argv)
 {
@@ -10,6 +12,19 @@ int main(int argc, char** argv)
     std::cerr << "Failed to build client" << std::endl;
     return 1;
   }
+
+  auto bin =
+      pinecone::types::binary_filter("title", pinecone::types::binary_operator::eq, "Physics");
+  auto f = pinecone::types::real_filter(bin);
+  auto arr = pinecone::types::array_filter<std::array<pinecone::types::metadata_value, 2>>(
+      "title", pinecone::types::array_operator::in, {"Nutrition", "Health"});
+  auto f2 = pinecone::types::real_filter(arr);
+  auto f3 = pinecone::types::real_filter(
+      pinecone::types::combination_filter(pinecone::types::combination_operator::and_, bin, arr));
+
+  std::cout << f.serialize() << std::endl;
+  std::cout << f2.serialize() << std::endl;
+  std::cout << f3.serialize() << std::endl;
 
   auto indexes = client->list_indexes();
   std::cout << "Num indexes: " << indexes->names().size() << std::endl;
