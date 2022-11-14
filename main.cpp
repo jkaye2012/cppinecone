@@ -2,8 +2,11 @@
 #include <iostream>
 
 #include "pinecone/pinecone.hpp"
+#include "pinecone/types/filters.hpp"
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/vector_metadata.hpp"
+
+namespace pf = pinecone::types::filters;
 
 int main(int argc, char** argv)
 {
@@ -15,16 +18,17 @@ int main(int argc, char** argv)
 
   auto bin =
       pinecone::types::binary_filter("title", pinecone::types::binary_operator::eq, "Physics");
-  auto f = pinecone::types::real_filter(bin);
   auto arr = pinecone::types::array_filter<std::array<pinecone::types::metadata_value, 2>>(
       "title", pinecone::types::array_operator::in, {"Nutrition", "Health"});
-  auto f2 = pinecone::types::real_filter(arr);
-  auto f3 = pinecone::types::real_filter(
-      pinecone::types::combination_filter(pinecone::types::combination_operator::and_, bin, arr));
+  auto and_ =
+      pinecone::types::combination_filter(pinecone::types::combination_operator::and_, bin, arr);
 
-  std::cout << f.serialize() << std::endl;
-  std::cout << f2.serialize() << std::endl;
-  std::cout << f3.serialize() << std::endl;
+  std::cout << bin.serialize() << std::endl;
+  std::cout << arr.serialize() << std::endl;
+  std::cout << and_.serialize() << std::endl;
+
+  auto example2 = pf::and_(pf::eq("title", "Physics"), pf::eq("author", "Bob"));
+  std::cout << example2.serialize() << std::endl;
 
   auto indexes = client->list_indexes();
   std::cout << "Num indexes: " << indexes->names().size() << std::endl;
@@ -35,8 +39,11 @@ int main(int argc, char** argv)
   auto configure_result = client->configure_index("squad", {1, "s1"});
   std::cout << configure_result.to_string() << std::endl;
 
-  auto stats = client->describe_index_stats("squad");
-  std::cout << "Described stats: " << stats.to_string() << std::endl;
+  auto unfiltered_stats = client->describe_index_stats("squad", pf::none());
+  std::cout << "Unfiltered: " << unfiltered_stats->namespaces().at("").vector_count() << std::endl;
+
+  auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
+  std::cout << "Filtered: " << filtered_stats->namespaces().at("").vector_count() << std::endl;
 
   // auto delete_result = client->delete_index("squad");
   // std::cout << delete_result.to_string() << std::endl;

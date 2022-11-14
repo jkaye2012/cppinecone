@@ -9,12 +9,12 @@
 
 namespace pinecone::domain
 {
-template <>
-struct operation_args<operation_type::vector_describe_index_stats>
-    : public vector_operation_args<operation_type::vector_describe_index_stats,
-                                   types::metadata_filter>,
+template <typename filter>
+struct operation_args<operation_type::vector_describe_index_stats, filter>
+    : public vector_operation_args<operation_type::vector_describe_index_stats, filter>,
       public types::parser<types::index_stats> {
-  using vector_operation_args::vector_operation_args;
+  using vector_operation_args<operation_type::vector_describe_index_stats,
+                              filter>::vector_operation_args;
 };
 
 }  // namespace pinecone::domain

@@ -62,11 +62,11 @@ struct http_client<threading_mode::sync> {
   http_client(http_client&&) noexcept = default;
   auto operator=(http_client&&) noexcept -> http_client& = default;
 
-  template <domain::operation_type Op>
-  auto request(domain::operation_args<Op> op_args) const noexcept
-      -> util::result<typename domain::operation_args<Op>::parsed_type>
+  template <domain::operation_type Op, typename Dep = bool>
+  auto request(domain::operation_args<Op, Dep> op_args) const noexcept
+      -> util::result<typename domain::operation_args<Op, Dep>::parsed_type>
   {
-    domain::operation<Op> operation(std::move(op_args));
+    domain::operation<Op, Dep> operation(std::move(op_args));
     _data.clear();
     auto result =
         operation

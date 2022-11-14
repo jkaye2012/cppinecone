@@ -33,6 +33,18 @@ struct index_stats {
                        api_result["totalVectorCount"]);
   }
 
+  [[nodiscard]] auto namespaces() const noexcept
+      -> std::unordered_map<std::string, namespace_summary> const&
+  {
+    return _namespaces;
+  }
+
+  [[nodiscard]] auto dimension() const noexcept -> uint64_t { return _dimension; }
+
+  [[nodiscard]] auto index_fullness() const noexcept -> double { return _index_fullness; }
+
+  [[nodiscard]] auto total_vector_count() const noexcept -> uint64_t { return _total_vector_count; }
+
  private:
   std::unordered_map<std::string, namespace_summary> _namespaces;
   uint64_t _dimension;

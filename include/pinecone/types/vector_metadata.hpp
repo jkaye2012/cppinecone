@@ -71,29 +71,43 @@ constexpr auto to_string(combination_operator combop) noexcept -> std::string_vi
 }
 
 struct metadata_value {
+  using value_type = std::variant<bool, int64_t, double, std::string_view>;
   // NOLINTNEXTLINE
-  metadata_value(char const* value) noexcept : var(std::string_view(value)) {}
+  constexpr metadata_value(char const* value) noexcept : _var(std::string_view(value)) {}
   // NOLINTNEXTLINE
-  metadata_value(std::string_view value) noexcept : var(value) {}
+  constexpr metadata_value(std::string_view value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
-  metadata_value(bool value) noexcept : var(value) {}
+  constexpr metadata_value(bool value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
-  metadata_value(int64_t value) noexcept : var(value) {}
+  constexpr metadata_value(int64_t value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
-  metadata_value(double value) noexcept : var(value) {}
+  constexpr metadata_value(double value) noexcept : _var(value) {}
 
-  std::variant<bool, int64_t, double, std::string_view> var;
+  [[nodiscard]] auto var() const noexcept -> value_type const& { return _var; }
+
+ private:
+  value_type _var;
 };
 
-inline auto to_json(json& j, metadata_value const& value) -> void
+constexpr auto to_json(json& j, metadata_value const& value) -> void
 {
-  std::visit([&j](auto const& v) -> void { j = v; }, value.var);
+  std::visit([&j](auto const& v) -> void { j = v; }, value.var());
 }
 
-struct binary_filter {
-  auto serialize(json& obj) const noexcept -> void { obj[_key] = {{to_string(_op), _value}}; }
+template <typename Derived>
+struct filter_base {
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json result{{"filter", json::object()}};
+    static_cast<Derived const*>(this)->serialize_impl(result["filter"]);
+    return result.dump();
+  }
+};
 
-  binary_filter(std::string_view key, binary_operator op, metadata_value value) noexcept
+struct binary_filter : public filter_base<binary_filter> {
+  auto serialize_impl(json& obj) const noexcept -> void { obj[_key] = {{to_string(_op), _value}}; }
+
+  constexpr binary_filter(std::string_view key, binary_operator op, metadata_value value) noexcept
       : _key(key), _op(op), _value(value)
   {
   }
@@ -106,8 +120,8 @@ struct binary_filter {
 
 // iter must support .begin() and .end(), and the value type must be convertible to metadata_value
 template <typename iter>
-struct array_filter {
-  auto serialize(json& obj) const noexcept -> void
+struct array_filter : public filter_base<array_filter<iter>> {
+  auto serialize_impl(json& obj) const noexcept -> void
   {
     auto opstr = to_string(_op);
     obj[_key] = {{opstr, json::array()}};
@@ -117,7 +131,7 @@ struct array_filter {
     }
   }
 
-  array_filter(std::string_view key, array_operator op, iter values) noexcept
+  constexpr array_filter(std::string_view key, array_operator op, iter values) noexcept
       : _key(key), _op(op), _values(std::move(values))
   {
   }
@@ -131,7 +145,7 @@ struct array_filter {
 template <typename filter>
 auto serialize_expand(json& arr, filter const& f) -> void
 {
-  f.serialize(arr.emplace_back());
+  f.serialize_impl(arr.emplace_back());
 }
 
 template <typename filter, typename... filters>
@@ -143,8 +157,8 @@ auto serialize_expand(json& arr, filter const& f, filters const&... fs) -> void
 
 // each ts must be one of binary_filter, array_filter, or combination_filter
 template <typename... ts>
-struct combination_filter {
-  auto serialize(json& obj) const noexcept -> void
+struct combination_filter : public filter_base<combination_filter<ts...>> {
+  auto serialize_impl(json& obj) const noexcept -> void
   {
     auto opstr = to_string(_op);
     obj[opstr] = json::array();
@@ -153,7 +167,8 @@ struct combination_filter {
                _filters);
   }
 
-  explicit combination_filter(combination_operator op, ts... filters) noexcept
+  // NOLINTNEXTLINE
+  constexpr combination_filter(combination_operator op, ts... filters) noexcept
       : _op(op), _filters(std::move(filters)...)
   {
   }
@@ -163,17 +178,13 @@ struct combination_filter {
   std::tuple<ts...> _filters;
 };
 
-struct metadata_filter {
-  [[nodiscard]] auto serialize() const noexcept -> std::string
-  {
-    json result{{"filter", {}}};
-    return result.dump();
-  }
+struct no_filter : public filter_base<no_filter> {
+  auto serialize_impl(json& obj) const noexcept -> void {}
 };
 
 template <typename filter>
-struct real_filter {
-  explicit real_filter(filter f) : _filter(std::move(f)) {}
+struct metadata_filter {
+  explicit constexpr metadata_filter(filter f) : _filter(std::move(f)) {}
 
   [[nodiscard]] auto serialize() const noexcept -> std::string
   {

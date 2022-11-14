@@ -108,9 +108,11 @@ struct pinecone_client {
         args<type::collection_create>(_url_builder, std::move(collection)));
   }
 
-  [[nodiscard]] auto describe_index_stats(std::string_view name) const noexcept
+  template <typename filter>
+  [[nodiscard]] auto describe_index_stats(std::string_view name, filter f) const noexcept
   {
-    return _http_client->request(args<type::vector_describe_index_stats>{_url_builder, name, {}});
+    return _http_client->request(domain::operation_args<type::vector_describe_index_stats, filter>{
+        _url_builder, name, std::move(f)});
   }
 
  private:

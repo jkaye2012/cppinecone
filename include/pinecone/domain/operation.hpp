@@ -98,7 +98,8 @@ struct vector_operation_args : public arg_base {
   std::string _body;
 };
 
-template <operation_type>
+// TODO: bool makes no sense here, should replace this with something dependent on operation type
+template <operation_type, typename = bool>
 struct operation_args;
 
 static constexpr auto kDelete = "DELETE";
@@ -107,9 +108,9 @@ static constexpr auto kPatch = "PATCH";
 /**
  * @brief Data common to all Pinecone API operation types.
  */
-template <operation_type Op>
+template <operation_type Op, typename Dep = bool>
 struct operation {
-  explicit operation(operation_args<Op> args) noexcept
+  explicit operation(operation_args<Op, Dep> args) noexcept
       : _args(std::move(args)), _method(op_method(op_type))
   {
   }
@@ -149,7 +150,7 @@ struct operation {
   }
 
  private:
-  operation_args<Op> _args;
+  operation_args<Op, Dep> _args;
   domain::method _method;
 };
 }  // namespace pinecone::domain
