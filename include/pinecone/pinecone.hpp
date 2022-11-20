@@ -25,6 +25,8 @@ namespace pinecone
 using type = domain::operation_type;
 template <type t>
 using args = domain::operation_args<t>;
+template <type t, typename f>
+using vec_args = domain::operation_args<t, f>;
 
 /**
  * @brief The Pinecone REST API client.
@@ -111,8 +113,15 @@ struct pinecone_client {
   template <typename filter>
   [[nodiscard]] auto describe_index_stats(std::string_view name, filter f) const noexcept
   {
-    return _http_client->request(domain::operation_args<type::vector_describe_index_stats, filter>{
-        _url_builder, name, std::move(f)});
+    return _http_client->request(
+        vec_args<type::vector_describe_index_stats, filter>{_url_builder, name, std::move(f)});
+  }
+
+  template <typename filter>
+  [[nodiscard]] auto query(std::string_view name, types::query<filter> f) const noexcept
+  {
+    return _http_client->request(
+        vec_args<type::vector_query, filter>{_url_builder, name, std::move(f)});
   }
 
  private:

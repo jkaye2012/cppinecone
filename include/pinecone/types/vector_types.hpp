@@ -1,8 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
+#include <variant>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -57,6 +60,166 @@ struct index_stats {
         _dimension(dimension),
         _index_fullness(index_fullness),
         _total_vector_count(total_vector_count)
+  {
+  }
+};
+
+template <typename filter>
+struct query {
+  struct builder {
+    builder(filter f, uint64_t top_k, double vector) noexcept
+        : _top_k(top_k), _query(vector), _filter(std::move(f))
+    {
+    }
+
+    builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept
+        : _top_k(top_k), _query(vector_id), _filter(std::move(f))
+    {
+    }
+
+    [[nodiscard]] auto with_namespace(std::string_view ns) noexcept -> builder&
+    {
+      _namespace = ns;
+      return *this;
+    }
+
+    [[nodiscard]] auto with_include_values(bool inc) noexcept -> builder&
+    {
+      _include_values = inc;
+      return *this;
+    }
+
+    [[nodiscard]] auto with_include_metadata(bool inc) noexcept -> builder&
+    {
+      _include_metadata = inc;
+      return *this;
+    }
+
+    [[nodiscard]] auto build() const noexcept -> query
+    {
+      return query(_namespace, _top_k, _filter, _include_values, _include_metadata, _query);
+    }
+
+   private:
+    uint64_t _top_k;
+    std::variant<double, std::string_view> _query;
+    filter _filter;
+    std::optional<std::string_view> _namespace;
+    std::optional<bool> _include_values;
+    std::optional<bool> _include_metadata;
+  };
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"topK", _top_k}};
+
+    if (std::holds_alternative<double>(_query)) {
+      repr["vector"] = std::get<double>(_query);
+    } else if (std::holds_alternative<std::string_view>(_query)) {
+      repr["id"] = std::get<std::string_view>(_query);
+    }
+
+    _filter.serialize(repr);
+    if (_namespace) {
+      repr["namespace"] = *_namespace;
+    }
+    if (_include_values) {
+      repr["includeValues"] = *_include_values;
+    }
+    if (_include_metadata) {
+      repr["includeMetadata"] = *_include_metadata;
+    }
+
+    return repr.dump();
+  }
+
+ private:
+  uint64_t _top_k;
+  std::variant<double, std::string_view> _query;
+  std::optional<std::string_view> _namespace;
+  filter _filter;
+  std::optional<bool> _include_values;
+  std::optional<bool> _include_metadata;
+
+  query(std::optional<std::string_view> ns, uint64_t top_k, filter f,
+        std::optional<bool> include_values, std::optional<bool> include_metadata,
+        std::variant<double, std::string_view> query) noexcept
+      : _top_k(top_k),
+        _query(query),
+        _namespace(ns),
+        _filter(std::move(f)),
+        _include_values(include_values),
+        _include_metadata(include_metadata)
+  {
+  }
+};
+
+struct query_result {
+  struct scored_vector {
+    [[nodiscard]] auto id() const noexcept -> std::string const& { return _id; }
+
+    [[nodiscard]] auto score() const noexcept -> double { return _score; }
+
+    [[nodiscard]] auto values() const noexcept -> std::optional<std::vector<double>> const&
+    {
+      return _values;
+    }
+
+    [[nodiscard]] auto metadata() const noexcept -> std::optional<json> const& { return _metadata; }
+
+    static auto build(json& api_result) -> scored_vector
+    {
+      std::optional<std::vector<double>> values;
+      if (auto vals = api_result["values"]; !vals.is_null()) {
+        values = std::vector<double>();
+        for (auto val : vals) {
+          values->emplace_back(val);
+        }
+      }
+
+      return {std::move(api_result["id"]), api_result["score"], std::move(values),
+              std::move(api_result["metadata"])};
+    }
+
+   private:
+    std::string _id;
+    double _score;
+    std::optional<std::vector<double>> _values;
+    std::optional<json> _metadata;
+
+    scored_vector(std::string id, double score, std::optional<std::vector<double>> values,
+                  std::optional<json> metadata) noexcept
+        : _id(std::move(id)),
+          _score(score),
+          _values(std::move(values)),
+          _metadata(std::move(metadata))
+    {
+    }
+  };
+
+  static auto build(json api_result) -> util::result<query_result>
+  {
+    std::vector<scored_vector> results;
+    for (auto& result : api_result["matches"]) {
+      results.emplace_back(scored_vector::build(result));
+    }
+
+    return query_result{api_result["namespace"], std::move(results)};
+  }
+
+  [[nodiscard]] auto ns() const noexcept -> std::string const& { return _namespace; }
+
+  [[nodiscard]] auto matches() const noexcept -> std::vector<scored_vector> const&
+  {
+    return _matches;
+  }
+
+ private:
+  std::string _namespace;
+  std::vector<scored_vector> _matches;
+
+  query_result(std::string ns, std::vector<scored_vector> matches) noexcept
+      : _namespace(std::move(ns)), _matches(std::move(matches))
   {
   }
 };

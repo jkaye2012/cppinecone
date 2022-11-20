@@ -102,6 +102,12 @@ struct filter_base {
     static_cast<Derived const*>(this)->serialize_impl(result["filter"]);
     return result.dump();
   }
+
+  auto serialize(json& obj) const noexcept -> void
+  {
+    obj["filter"] = json::object();
+    static_cast<Derived const*>(this)->serialize_impl(obj["filter"]);
+  }
 };
 
 struct binary_filter : public filter_base<binary_filter> {
@@ -180,20 +186,5 @@ struct combination_filter : public filter_base<combination_filter<ts...>> {
 
 struct no_filter : public filter_base<no_filter> {
   auto serialize_impl(json& obj) const noexcept -> void {}
-};
-
-template <typename filter>
-struct metadata_filter {
-  explicit constexpr metadata_filter(filter f) : _filter(std::move(f)) {}
-
-  [[nodiscard]] auto serialize() const noexcept -> std::string
-  {
-    json result{{"filter", json::object()}};
-    _filter.serialize(result["filter"]);
-    return result.dump();
-  }
-
- private:
-  filter _filter;
 };
 }  // namespace pinecone::types

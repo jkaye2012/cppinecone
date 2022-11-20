@@ -17,4 +17,11 @@ struct operation_args<operation_type::vector_describe_index_stats, filter>
                               filter>::vector_operation_args;
 };
 
+template <typename filter>
+struct operation_args<operation_type::vector_query, filter>
+    : public vector_operation_args<operation_type::vector_query, types::query<filter>>,
+      public types::parser<types::query_result> {
+  using vector_operation_args<operation_type::vector_query,
+                              types::query<filter>>::vector_operation_args;
+};
 }  // namespace pinecone::domain

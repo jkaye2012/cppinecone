@@ -5,6 +5,7 @@
 #include "pinecone/types/filters.hpp"
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/vector_metadata.hpp"
+#include "pinecone/types/vector_types.hpp"
 
 namespace pf = pinecone::types::filters;
 
@@ -44,6 +45,11 @@ int main(int argc, char** argv)
 
   auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
   std::cout << "Filtered: " << filtered_stats->namespaces().at("").vector_count() << std::endl;
+
+  auto q =
+      pinecone::types::query<pinecone::types::no_filter>::builder(pf::none(), 1, "11113").build();
+  auto search_result = client->query("squad", q);
+  std::cout << "Query result: " << search_result.to_string() << std::endl;
 
   // auto delete_result = client->delete_index("squad");
   // std::cout << delete_result.to_string() << std::endl;
