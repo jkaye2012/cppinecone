@@ -10,6 +10,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "pinecone/types/filters.hpp"
 #include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/util/result.hpp"
 
@@ -66,9 +67,18 @@ struct index_stats {
   }
 };
 
-template <typename filter>
+template <typename filter = no_filter>
 struct query {
   struct builder {
+    builder(uint64_t top_k, double vector) noexcept
+        : _top_k(top_k), _query(vector), _filter(filters::none())
+    {
+    }
+
+    builder(uint64_t top_k, std::string_view vector_id) noexcept
+        : _top_k(top_k), _query(vector_id), _filter(filters::none())
+    {
+    }
     builder(filter f, uint64_t top_k, double vector) noexcept
         : _top_k(top_k), _query(vector), _filter(std::move(f))
     {

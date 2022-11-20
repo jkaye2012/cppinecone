@@ -46,8 +46,9 @@ int main(int argc, char** argv)
   auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
   std::cout << "Filtered: " << filtered_stats->namespaces().at("").vector_count() << std::endl;
 
-  auto q =
-      pinecone::types::query<pinecone::types::no_filter>::builder(pf::none(), 1, "11113").build();
+  // TODO: this construction requires users to pre-create a filter and decltype it; should provide
+  // something more ergonomic
+  auto q = pinecone::types::query<>::builder(1, "11113").build();
   auto search_result = client->query("squad", q);
   std::cout << "Query result: " << search_result.to_string() << std::endl;
 
