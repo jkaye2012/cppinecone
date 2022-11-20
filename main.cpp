@@ -70,4 +70,8 @@ int main(int argc, char** argv)
 
   auto db = client->describe_index("squad");
   std::cout << db->dimension() << std::endl;
+
+  // auto del_req = pinecone::types::delete_request<>::builder().build();
+  // auto del_res = client->delete_vectors("squad", del_req);
+  // std::cout << del_res.to_string() << std::endl;
 }

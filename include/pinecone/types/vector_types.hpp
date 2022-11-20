@@ -4,11 +4,13 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
+#include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
@@ -220,6 +222,65 @@ struct query_result {
 
   query_result(std::string ns, std::vector<scored_vector> matches) noexcept
       : _namespace(std::move(ns)), _matches(std::move(matches))
+  {
+  }
+};
+
+using ids = std::vector<std::string_view>;
+
+template <typename filter = no_filter>
+struct delete_request {
+  using delete_mode = std::variant<ids, bool, filter>;
+
+  struct builder {
+    explicit builder(ids ids) noexcept : _mode(std::move(ids)) {}
+    builder() noexcept : _mode(true) {}
+    explicit builder(filter f) noexcept : _mode(std::move(f)) {}
+
+    [[nodiscard]] auto build() const noexcept -> delete_request
+    {
+      return delete_request(_mode, _namespace);
+    }
+
+    auto with_namespace(std::string_view ns) noexcept -> builder&
+    {
+      _namespace = ns;
+      return *this;
+    }
+
+   private:
+    delete_mode _mode;
+    std::optional<std::string_view> _namespace;
+  };
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {};
+
+    if (_namespace) {
+      repr["namespace"] = *_namespace;
+    }
+
+    if (std::holds_alternative<ids>(_mode)) {
+      repr["ids"] = json::array({});
+      for (auto const& id : std::get<ids>(_mode)) {
+        repr["ids"].emplace_back(id);
+      }
+    } else if (std::holds_alternative<bool>(_mode)) {
+      repr["deleteAll"] = std::get<bool>(_mode);
+    } else if (std::holds_alternative<filter>(_mode)) {
+      std::get<filter>(_mode).serialize(repr);
+    }
+
+    return repr.dump();
+  }
+
+ private:
+  delete_mode _mode;
+  std::optional<std::string_view> _namespace;
+
+  delete_request(delete_mode mode, std::optional<std::string_view> ns) noexcept
+      : _mode(std::move(mode)), _namespace(ns)
   {
   }
 };

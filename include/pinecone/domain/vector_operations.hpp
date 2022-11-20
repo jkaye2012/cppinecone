@@ -24,4 +24,12 @@ struct operation_args<operation_type::vector_query, filter>
   using vector_operation_args<operation_type::vector_query,
                               types::query<filter>>::vector_operation_args;
 };
+
+template <typename filter>
+struct operation_args<operation_type::vector_delete, filter>
+    : public vector_operation_args<operation_type::vector_delete, types::delete_request<filter>>,
+      public types::parser<types::accepted> {
+  using vector_operation_args<operation_type::vector_delete,
+                              types::delete_request<filter>>::vector_operation_args;
+};
 }  // namespace pinecone::domain

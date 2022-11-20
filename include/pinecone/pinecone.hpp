@@ -118,10 +118,18 @@ struct pinecone_client {
   }
 
   template <typename filter>
-  [[nodiscard]] auto query(std::string_view name, types::query<filter> f) const noexcept
+  [[nodiscard]] auto query(std::string_view name, types::query<filter> query) const noexcept
   {
     return _http_client->request(
-        vec_args<type::vector_query, filter>{_url_builder, name, std::move(f)});
+        vec_args<type::vector_query, filter>{_url_builder, name, std::move(query)});
+  }
+
+  template <typename filter>
+  [[nodiscard]] auto delete_vectors(std::string_view name,
+                                    types::delete_request<filter> req) const noexcept
+  {
+    return _http_client->request(
+        vec_args<type::vector_delete, filter>{_url_builder, name, std::move(req)});
   }
 
  private:
