@@ -83,12 +83,13 @@ using request_failed = failure_reason<failure::request_failed>;
 
 template <>
 struct failure_reason<failure::parsing_failed> {
-  explicit failure_reason(json::exception ex) noexcept : _ex(std::move(ex)) {}
+  explicit failure_reason(json::exception const& ex) noexcept : _message(ex.what()) {}
+  explicit failure_reason(char const* message) noexcept : _message(message) {}
 
-  [[nodiscard]] constexpr auto exception() const noexcept -> json::exception const& { return _ex; }
+  [[nodiscard]] constexpr auto message() const noexcept -> char const* { return _message; }
 
  private:
-  json::exception _ex;
+  const char* _message;
 };
 using parsing_failed = failure_reason<failure::parsing_failed>;
 
@@ -104,7 +105,9 @@ struct result {
   // NOLINTNEXTLINE
   result(int64_t code, std::string body) noexcept : _value(request_failed(code, std::move(body))) {}
   // NOLINTNEXTLINE
-  result(json::exception ex) noexcept : _value(parsing_failed(std::move(ex))) {}
+  result(json::exception const& ex) noexcept : _value(parsing_failed(ex)) {}
+  // NOLINTNEXTLINE
+  result(char const* message) noexcept : _value(parsing_failed(message)) {}
   // NOLINTNEXTLINE
   result(error_type err) noexcept : _value(std::move(err)) {}
 
@@ -143,7 +146,7 @@ struct result {
             << std::get<request_failed>(err).body();
         break;
       case 2:
-        oss << "Parsing failed: " << std::get<parsing_failed>(err).exception().what();
+        oss << "Parsing failed: " << std::get<parsing_failed>(err).message();
         break;
       default:
         return "unknown";

@@ -5,9 +5,12 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <unordered_map>
 #include <variant>
 
 #include <nlohmann/json.hpp>
+
+#include "pinecone/util/result.hpp"
 
 using json = nlohmann::json;
 
@@ -71,11 +74,11 @@ constexpr auto to_string(combination_operator combop) noexcept -> std::string_vi
 }
 
 struct metadata_value {
-  using value_type = std::variant<bool, int64_t, double, std::string_view>;
+  using value_type = std::variant<bool, int64_t, double, std::string>;
   // NOLINTNEXTLINE
-  constexpr metadata_value(char const* value) noexcept : _var(std::string_view(value)) {}
+  constexpr metadata_value(char const* value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
-  constexpr metadata_value(std::string_view value) noexcept : _var(value) {}
+  metadata_value(std::string value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
   constexpr metadata_value(bool value) noexcept : _var(value) {}
   // NOLINTNEXTLINE
@@ -85,8 +88,65 @@ struct metadata_value {
 
   [[nodiscard]] auto var() const noexcept -> value_type const& { return _var; }
 
+  [[nodiscard]] auto to_string() const noexcept -> std::string
+  {
+    return std::visit(
+        [](auto const& v) {
+          if constexpr (std::is_same_v<std::decay_t<decltype(v)>, std::string>) {
+            return v;
+          } else {
+            return std::to_string(v);
+          }
+        },
+        _var);
+  }
+
  private:
   value_type _var;
+};
+
+struct metadata {
+  explicit metadata(std::unordered_map<std::string, metadata_value> values) noexcept
+      : _values(std::move(values))
+  {
+  }
+
+  [[nodiscard]] auto values() const noexcept
+      -> std::unordered_map<std::string, metadata_value> const&
+  {
+    return _values;
+  }
+
+  static auto build(json const& api_result) -> util::result<metadata>
+  {
+    std::unordered_map<std::string, metadata_value> values;
+    for (auto const& [key, value] : api_result.items()) {
+      if (value.is_boolean()) {
+        values.emplace(key, value.get<bool>());
+      } else if (value.is_number_integer()) {
+        values.emplace(key, value.get<int64_t>());
+      } else if (value.is_number_float()) {
+        values.emplace(key, value.get<double>());
+      } else if (value.is_string()) {
+        values.emplace(key, value.get<std::string>());
+      } else {
+        return {"Metadata value was not a boolean, integer, float, or string"};
+      }
+    }
+
+    return metadata(std::move(values));
+  }
+
+  auto serialize(json& obj) const noexcept -> void
+  {
+    obj["metadata"] = json::object();
+    for (auto const& [key, value] : _values) {
+      std::visit([&](auto const& v) { obj["metadata"] = v; }, value.var());
+    }
+  }
+
+ private:
+  std::unordered_map<std::string, metadata_value> _values;
 };
 
 constexpr auto to_json(json& j, metadata_value const& value) -> void
@@ -113,13 +173,13 @@ struct filter_base {
 struct binary_filter : public filter_base<binary_filter> {
   auto serialize_impl(json& obj) const noexcept -> void { obj[_key] = {{to_string(_op), _value}}; }
 
-  constexpr binary_filter(std::string_view key, binary_operator op, metadata_value value) noexcept
-      : _key(key), _op(op), _value(value)
+  binary_filter(std::string key, binary_operator op, metadata_value value) noexcept
+      : _key(std::move(key)), _op(op), _value(std::move(value))
   {
   }
 
  private:
-  std::string_view _key;
+  std::string _key;
   binary_operator _op;
   metadata_value _value;
 };
@@ -137,13 +197,13 @@ struct array_filter : public filter_base<array_filter<iter>> {
     }
   }
 
-  constexpr array_filter(std::string_view key, array_operator op, iter values) noexcept
-      : _key(key), _op(op), _values(std::move(values))
+  array_filter(std::string key, array_operator op, iter values) noexcept
+      : _key(std::move(key)), _op(op), _values(std::move(values))
   {
   }
 
  private:
-  std::string_view _key;
+  std::string _key;
   array_operator _op;
   iter _values;
 };

@@ -1,64 +1,64 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 #include "pinecone/types/vector_metadata.hpp"
 
 namespace pinecone::types::filters
 {
-constexpr auto eq(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto eq(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::eq, value};
+  return {std::move(key), binary_operator::eq, std::move(value)};
 }
 
-constexpr auto ne(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto ne(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::ne, value};
+  return {std::move(key), binary_operator::ne, std::move(value)};
 };
 
-constexpr auto gt(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto gt(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::gt, value};
+  return {std::move(key), binary_operator::gt, std::move(value)};
 };
 
-constexpr auto gte(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto gte(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::gte, value};
+  return {std::move(key), binary_operator::gte, std::move(value)};
 };
 
-constexpr auto lt(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto lt(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::lt, value};
+  return {std::move(key), binary_operator::lt, std::move(value)};
 };
 
-constexpr auto lte(std::string_view key, metadata_value value) noexcept -> binary_filter
+inline auto lte(std::string key, metadata_value value) noexcept -> binary_filter
 {
-  return {key, binary_operator::lte, value};
-};
-
-template <typename iter>
-constexpr auto in(std::string_view key, iter values) noexcept -> array_filter<iter>
-{
-  return {key, array_operator::in, std::move(values)};
+  return {std::move(key), binary_operator::lte, std::move(value)};
 };
 
 template <typename iter>
-constexpr auto nin(std::string_view key, iter values) noexcept -> array_filter<iter>
+inline auto in(std::string key, iter values) noexcept -> array_filter<iter>
 {
-  return {key, array_operator::nin, std::move(values)};
+  return {std::move(key), array_operator::in, std::move(values)};
+};
+
+template <typename iter>
+inline auto nin(std::string key, iter values) noexcept -> array_filter<iter>
+{
+  return {std::move(key), array_operator::nin, std::move(values)};
 };
 
 template <typename... ts>
-constexpr auto and_(ts... filters) noexcept -> combination_filter<ts...>
+inline auto and_(ts... filters) noexcept -> combination_filter<ts...>
 {
   return {combination_operator::and_, std::move(filters)...};
 };
 
 template <typename... ts>
-constexpr auto or_(ts... filters) noexcept -> combination_filter<ts...>
+inline auto or_(ts... filters) noexcept -> combination_filter<ts...>
 {
   return {combination_operator::or_, std::move(filters)...};
 };
 
-constexpr auto none() noexcept -> no_filter { return {}; };
+inline auto none() noexcept -> no_filter { return {}; };
 }  // namespace pinecone::types::filters

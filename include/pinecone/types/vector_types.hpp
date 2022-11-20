@@ -177,9 +177,9 @@ struct query_result {
       return _values;
     }
 
-    [[nodiscard]] auto metadata() const noexcept -> std::optional<json> const& { return _metadata; }
+    [[nodiscard]] auto md() const noexcept -> std::optional<metadata> const& { return _metadata; }
 
-    static auto build(json& api_result) -> scored_vector
+    static auto build(json& api_result) -> util::result<scored_vector>
     {
       std::optional<std::vector<double>> values;
       if (auto vals = api_result["values"]; !vals.is_null()) {
@@ -189,22 +189,28 @@ struct query_result {
         }
       }
 
-      return {std::move(api_result["id"]), api_result["score"], std::move(values),
-              std::move(api_result["metadata"])};
+      std::optional<metadata> md;
+      if (api_result.contains("metadata")) {
+        auto md_result = metadata::build(api_result["metadata"]);
+        if (md_result.is_failed()) {
+          return md_result.propagate<scored_vector>();
+        }
+        md = *md_result;
+      }
+
+      return scored_vector(std::move(api_result["id"]), api_result["score"], std::move(values),
+                           std::move(md));
     }
 
    private:
     std::string _id;
     double _score;
     std::optional<std::vector<double>> _values;
-    std::optional<json> _metadata;
+    std::optional<metadata> _metadata;
 
     scored_vector(std::string id, double score, std::optional<std::vector<double>> values,
-                  std::optional<json> metadata) noexcept
-        : _id(std::move(id)),
-          _score(score),
-          _values(std::move(values)),
-          _metadata(std::move(metadata))
+                  std::optional<metadata> md) noexcept
+        : _id(std::move(id)), _score(score), _values(std::move(values)), _metadata(std::move(md))
     {
     }
   };
@@ -213,7 +219,11 @@ struct query_result {
   {
     std::vector<scored_vector> results;
     for (auto& result : api_result["matches"]) {
-      results.emplace_back(scored_vector::build(result));
+      auto sv = scored_vector::build(result);
+      if (sv.is_failed()) {
+        return sv.propagate<query_result>();
+      }
+      results.emplace_back(*sv);
     }
 
     return query_result{api_result["namespace"], std::move(results)};
@@ -293,5 +303,12 @@ struct delete_request {
       : _mode(std::move(mode)), _namespace(ns)
   {
   }
+};
+
+struct vector {
+ private:
+  std::string _id;
+  std::vector<double> _values;
+  std::optional<metadata> _metadata;
 };
 }  // namespace pinecone::types
