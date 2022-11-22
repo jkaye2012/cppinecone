@@ -139,9 +139,10 @@ struct metadata {
 
   auto serialize(json& obj) const noexcept -> void
   {
-    obj["metadata"] = json::object();
+    obj = json::object({});
+    // TODO: elide this copy
     for (auto const& [key, value] : _values) {
-      std::visit([&](auto const& v) { obj["metadata"] = v; }, value.var());
+      std::visit([&, k = key](auto const& v) { obj[k] = v; }, value.var());
     }
   }
 

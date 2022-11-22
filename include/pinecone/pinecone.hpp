@@ -137,6 +137,11 @@ struct pinecone_client {
     return _http_client->request(args<type::vector_upsert>{_url_builder, name, std::move(req)});
   }
 
+  [[nodiscard]] auto update_vector(std::string_view name, types::update_request req) const noexcept
+  {
+    return _http_client->request(args<type::vector_update>{_url_builder, name, std::move(req)});
+  }
+
  private:
   net::url_builder _url_builder;
   std::unique_ptr<net::http_client<Mode>> _http_client;

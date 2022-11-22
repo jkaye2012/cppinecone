@@ -323,7 +323,7 @@ struct vector {
   {
     json repr = {{"id", _id}, {"values", _values}};
     if (_metadata) {
-      _metadata->serialize(repr);
+      _metadata->serialize(repr["metadata"]);
     }
     return repr.dump();
   }
@@ -387,6 +387,69 @@ struct upsert_request {
 
   upsert_request(std::vector<vector> vectors, std::optional<std::string_view> ns) noexcept
       : _vectors(std::move(vectors)), _namespace(ns)
+  {
+  }
+};
+
+struct update_request {
+  struct builder {
+    explicit builder(std::string_view id) noexcept : _id(id) {}
+
+    [[nodiscard]] auto build() const noexcept -> update_request
+    {
+      return {_id, _values, _metadata, _namespace};
+    }
+
+    auto with_namespace(std::string_view ns) noexcept -> builder&
+    {
+      _namespace = ns;
+      return *this;
+    }
+
+    auto with_values(std::vector<double> values) noexcept -> builder&
+    {
+      _values = std::move(values);
+      return *this;
+    }
+
+    auto with_metadata(metadata md) noexcept -> builder&
+    {
+      _metadata = md;
+      return *this;
+    }
+
+   private:
+    std::string_view _id;
+    std::optional<std::vector<double>> _values;
+    std::optional<metadata> _metadata;
+    std::optional<std::string_view> _namespace;
+  };
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"id", _id}};
+    if (_values) {
+      repr["values"] = *_values;
+    }
+    if (_metadata) {
+      _metadata->serialize(repr["setMetadata"]);
+    }
+    if (_namespace) {
+      repr["namespace"] = *_namespace;
+    }
+
+    return repr.dump();
+  }
+
+ private:
+  std::string_view _id;
+  std::optional<std::vector<double>> _values;
+  std::optional<metadata> _metadata;
+  std::optional<std::string_view> _namespace;
+
+  update_request(std::string_view id, std::optional<std::vector<double>> values,
+                 std::optional<metadata> md, std::optional<std::string_view> ns) noexcept
+      : _id(id), _values(std::move(values)), _metadata(std::move(md)), _namespace(ns)
   {
   }
 };

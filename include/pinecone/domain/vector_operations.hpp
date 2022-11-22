@@ -40,4 +40,12 @@ struct operation_args<operation_type::vector_upsert>
   using vector_operation_args<operation_type::vector_upsert,
                               types::upsert_request>::vector_operation_args;
 };
+
+template <>
+struct operation_args<operation_type::vector_update>
+    : public vector_operation_args<operation_type::vector_update, types::update_request>,
+      public types::parser<types::accepted> {
+  using vector_operation_args<operation_type::vector_update,
+                              types::update_request>::vector_operation_args;
+};
 }  // namespace pinecone::domain

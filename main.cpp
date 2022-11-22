@@ -46,6 +46,13 @@ int main(int argc, char** argv)
   auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
   std::cout << "Filtered: " << filtered_stats->namespaces().at("").vector_count() << std::endl;
 
+  pinecone::types::metadata update_md{{{"Testing", "A thing"}}};
+  auto update_req =
+      pinecone::types::update_request::builder("11113").with_metadata(std::move(update_md)).build();
+  std::cout << update_req.serialize() << std::endl;
+  auto updated = client->update_vector("squad", std::move(update_req));
+  std::cout << "Updated: " << updated.to_string() << std::endl;
+
   // TODO: this construction requires users to pre-create a filter and decltype it; should provide
   // something more ergonomic
   auto q = pinecone::types::query<>::builder(1, "11113").with_include_metadata(true).build();
