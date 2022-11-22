@@ -93,7 +93,7 @@ struct http_client<threading_mode::sync> {
         } catch (json::exception& ex) {
           return {std::move(ex)};
         }
-      default:
+      default:  // TODO: parse errors when possible
         return {http_code, std::string(_data.begin(), _data.end())};
     }
   }

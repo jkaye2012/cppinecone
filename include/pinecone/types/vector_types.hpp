@@ -182,11 +182,8 @@ struct query_result {
     static auto build(json& api_result) -> util::result<scored_vector>
     {
       std::optional<std::vector<double>> values;
-      if (auto vals = api_result["values"]; !vals.is_null()) {
-        values = std::vector<double>();
-        for (auto val : vals) {
-          values->emplace_back(val);
-        }
+      if (api_result.contains("values")) {
+        values = api_result["values"];
       }
 
       std::optional<metadata> md;
@@ -306,9 +303,91 @@ struct delete_request {
 };
 
 struct vector {
+  vector(std::string id, std::vector<double> values) noexcept
+      : _id(std::move(id)), _values(std::move(values)), _metadata(std::nullopt)
+  {
+  }
+
+  vector(std::string id, std::vector<double> values, std::optional<metadata> md) noexcept
+      : _id(std::move(id)), _values(std::move(values)), _metadata(std::move(md))
+  {
+  }
+
+  [[nodiscard]] auto id() const noexcept -> std::string const& { return _id; }
+
+  [[nodiscard]] auto values() const noexcept -> std::vector<double> const& { return _values; }
+
+  [[nodiscard]] auto md() const noexcept -> std::optional<metadata> const& { return _metadata; }
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"id", _id}, {"values", _values}};
+    if (_metadata) {
+      _metadata->serialize(repr);
+    }
+    return repr.dump();
+  }
+
+  [[nodiscard]] static auto build(json api_result) -> util::result<vector>
+  {
+    std::optional<metadata> md;
+    if (api_result.contains("metadata")) {
+      auto md_result = metadata::build(api_result["metadata"]);
+      if (md_result.is_failed()) {
+        return md_result.propagate<vector>();
+      }
+      md = *md_result;
+    }
+
+    std::vector<double> values = api_result["values"];
+
+    return vector(std::move(api_result["id"]), std::move(values), std::move(md));
+  }
+
  private:
   std::string _id;
   std::vector<double> _values;
   std::optional<metadata> _metadata;
+};
+
+struct upsert_request {
+  struct builder {
+    explicit builder(std::vector<vector> vectors) noexcept : _vectors(std::move(vectors)) {}
+
+    [[nodiscard]] auto build() const noexcept -> upsert_request { return {_vectors, _namespace}; }
+
+    auto with_namespace(std::string_view ns) noexcept -> builder&
+    {
+      _namespace = ns;
+      return *this;
+    }
+
+   private:
+    std::vector<vector> _vectors;
+    std::optional<std::string_view> _namespace;
+  };
+
+  [[nodiscard]] auto serialize() const noexcept -> std::string
+  {
+    json repr = {{"vectors", json::array({})}};
+    for (auto const& vector : _vectors) {
+      repr["vectors"].emplace_back(json::parse(vector.serialize()));
+    }
+
+    if (_namespace) {
+      repr["namespace"] = *_namespace;
+    }
+
+    return repr.dump();
+  }
+
+ private:
+  std::vector<vector> _vectors;
+  std::optional<std::string_view> _namespace;
+
+  upsert_request(std::vector<vector> vectors, std::optional<std::string_view> ns) noexcept
+      : _vectors(std::move(vectors)), _namespace(ns)
+  {
+  }
 };
 }  // namespace pinecone::types

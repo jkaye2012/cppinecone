@@ -32,4 +32,12 @@ struct operation_args<operation_type::vector_delete, filter>
   using vector_operation_args<operation_type::vector_delete,
                               types::delete_request<filter>>::vector_operation_args;
 };
+
+template <>
+struct operation_args<operation_type::vector_upsert>
+    : public vector_operation_args<operation_type::vector_upsert, types::upsert_request>,
+      public types::parser<types::accepted> {
+  using vector_operation_args<operation_type::vector_upsert,
+                              types::upsert_request>::vector_operation_args;
+};
 }  // namespace pinecone::domain
