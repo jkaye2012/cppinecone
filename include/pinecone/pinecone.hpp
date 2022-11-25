@@ -15,6 +15,7 @@
 #include "pinecone/net/url_builder.hpp"
 #include "pinecone/types/accepted.hpp"
 #include "pinecone/types/api_metadata.hpp"
+#include "pinecone/types/filters.hpp"
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/types/vector_types.hpp"
@@ -115,6 +116,13 @@ struct pinecone_client {
   {
     return _http_client->request(
         vec_args<type::vector_describe_index_stats, filter>{_url_builder, name, std::move(f)});
+  }
+
+  template <typename filter>
+  [[nodiscard]] auto describe_index_stats(std::string_view name) const noexcept
+  {
+    return _http_client->request(vec_args<type::vector_describe_index_stats, filter>{
+        _url_builder, name, types::filters::none()});
   }
 
   template <typename filter>

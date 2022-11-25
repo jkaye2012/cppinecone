@@ -9,7 +9,7 @@
 
 namespace pf = pinecone::types::filters;
 
-int main(int argc, char** argv)
+auto main(int /*argc*/, char** argv) -> int
 {
   auto client = pinecone::synchronous_client::build({"us-west1-gcp", argv[1]});
   if (!client) {

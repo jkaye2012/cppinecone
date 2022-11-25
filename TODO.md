@@ -7,3 +7,6 @@
 - [ ] Document architecture, namespace deps, etc
 - [ ] Consider noexcept interaction with allocations
 - [ ] Add policy to public API for possibility of throwing
+- [ ] Complete implementation of fetch operation
+- [ ] Create Dockerfile for dev/build environment
+- [ ] Integrate documentation generation

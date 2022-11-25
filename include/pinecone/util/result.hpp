@@ -94,7 +94,7 @@ struct failure_reason<failure::parsing_failed> {
 using parsing_failed = failure_reason<failure::parsing_failed>;
 
 template <typename T>
-struct result {
+struct [[nodiscard]] result {
   using error_type = std::variant<request_rejected, request_failed, parsing_failed>;
   using value_type = std::variant<T, error_type>;
 

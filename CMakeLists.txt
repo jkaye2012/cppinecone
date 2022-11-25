@@ -1,29 +1,38 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
-# TODO: make configurable
-set(CMAKE_BUILD_TYPE Debug)
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
 if($CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -D_GLIBCXX_DEBUG")
 endif()
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 project(main)
 
 include(ExternalProject)
 include(FetchContent)
 
-# TODO: allow user to configure these
-set(CURL_VERSION 7.86.0)
-set(JSON_VERSION 3.11.2)
-set(CATCH2_VERSION 3.1.1)
+if(NOT DEFINED CURL_VERSION)
+  set(CURL_VERSION 7.86.0)
+endif()
+if(NOT DEFINED JSON_VERSION)
+  set(JSON_VERSION 3.11.2)
+endif()
+if(NOT DEFINED CATCH2_VERSION)
+  set(CATCH2_VERSION 3.1.1)
+endif()
 
-# TODO: openssl should be configurable/optional
+if(NOT DEFINED CURL_SSL_BACKEND)
+  set(CURL_SSL_BACKEND "openssl")
+endif()
+string(APPEND CURL_SSL_OPT "--with-" ${CURL_SSL_BACKEND})
+
 ExternalProject_Add(
   curl
   URL https://curl.se/download/curl-${CURL_VERSION}.tar.gz
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/curl/
-  CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/curl/configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/lib/curl --with-openssl
+  CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/curl/configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/lib/curl ${CURL_SSL_OPT}
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl
   BUILD_COMMAND make
   BUILD_IN_SOURCE 1
@@ -67,5 +76,4 @@ target_link_libraries(cppinecone PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohman
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE cppinecone)
 
-# TODO: make building tests optional?
 add_subdirectory(tests)

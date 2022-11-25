@@ -69,10 +69,7 @@ struct http_client<threading_mode::sync> {
     domain::operation<Op, Dep> operation(std::move(op_args));
     _data.clear();
     auto result =
-        operation
-            .set_opts(_curl_handle, _headers)
-            // .and_then([this]() { return curl_easy_setopt(_curl_handle, CURLOPT_VERBOSE, 1L); })
-            // // TODO: dynamically enable?
+        operation.set_opts(_curl_handle, _headers)
             .and_then([this]() {
               return curl_easy_setopt(_curl_handle, CURLOPT_WRITEFUNCTION, http_client::read);
             })

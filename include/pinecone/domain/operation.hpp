@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <string>
+#include <variant>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -98,8 +99,7 @@ struct vector_operation_args : public arg_base {
   std::string _body;
 };
 
-// TODO: bool makes no sense here, should replace this with something dependent on operation type
-template <operation_type, typename = bool>
+template <operation_type, typename = std::monostate>
 struct operation_args;
 
 static constexpr auto kDelete = "DELETE";
@@ -108,7 +108,7 @@ static constexpr auto kPatch = "PATCH";
 /**
  * @brief Data common to all Pinecone API operation types.
  */
-template <operation_type Op, typename Dep = bool>
+template <operation_type Op, typename Dep = std::monostate>
 struct operation {
   explicit operation(operation_args<Op, Dep> args) noexcept
       : _args(std::move(args)), _method(op_method(op_type))
