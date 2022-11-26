@@ -4,9 +4,9 @@ set(CMAKE_CXX_STANDARD 17)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
-if($CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -D_GLIBCXX_DEBUG")
-endif()
+# if($CMAKE_BUILD_TYPE STREQUAL "Debug")
+#   set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -D_GLIBCXX_DEBUG")
+# endif()
 
 project(main)
 
@@ -35,19 +35,18 @@ ExternalProject_Add(
   CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/curl/configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/lib/curl ${CURL_SSL_OPT}
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl
   BUILD_COMMAND make
-  BUILD_IN_SOURCE 1
+  BUILD_IN_SOURCE 0
 )
-find_package(CURL REQUIRED)
+add_library(libcurl SHARED IMPORTED)
+include_directories(BEFORE SYSTEM ${CMAKE_SOURCE_DIR}/deps/curl/include)
+set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/curl/lib/libcurl.so)
 
 FetchContent_Declare(json
   URL https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
 )
 FetchContent_MakeAvailable(json)
 
-include_directories(
-  ${CURL_INCLUDE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
- )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(cppinecone STATIC
   src/pinecone.cpp
@@ -71,7 +70,8 @@ add_library(cppinecone STATIC
   src/util/visit.cpp
 )
 
-target_link_libraries(cppinecone PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohmann_json)
+
+target_link_libraries(cppinecone PUBLIC libcurl nlohmann_json::nlohmann_json)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE cppinecone)
