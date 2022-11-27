@@ -13,3 +13,13 @@ theme:
 
 plugins:
   - search
+
+nav:
+  - index.md
+  - introduction.md
+  - quickstart.md
+  - installation.md
+  - metadata_query_api.md
+  - customization.md
+  - build.md
+  - architecture.md
