@@ -4,9 +4,6 @@ set(CMAKE_CXX_STANDARD 17)
 if(NOT DEFINED CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
-# if($CMAKE_BUILD_TYPE STREQUAL "Debug")
-#   set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -D_GLIBCXX_DEBUG")
-# endif()
 
 project(main)
 
@@ -69,7 +66,6 @@ add_library(cppinecone STATIC
   src/util/result.cpp
   src/util/visit.cpp
 )
-
 
 target_link_libraries(cppinecone PUBLIC libcurl nlohmann_json::nlohmann_json)
 

@@ -1,0 +1,15 @@
+site_name: Cppinecone
+repo_url: https://github.com/jkaye2012/cppinecone
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: blue grey
+    accent: deep orange
+  features:
+    - navigation.instant
+    - navigation.top
+
+plugins:
+  - search
