@@ -37,7 +37,9 @@ auto main(int /*argc*/, char** argv) -> int
   auto collections = client->list_collections();
   std::cout << "Num collections: " << collections->names().size() << std::endl;
 
-  auto configure_result = client->configure_index("squad", {1, "s1"});
+  auto configure_result = client->configure_index(
+      "squad", {1, pinecone::types::pod_configuration(pinecone::types::pod_type::s1,
+                                                      pinecone::types::pod_size::x1)});
   std::cout << configure_result.to_string() << std::endl;
 
   auto unfiltered_stats = client->describe_index_stats("squad", pf::none());
