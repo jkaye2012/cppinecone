@@ -58,6 +58,7 @@ add_library(cppinecone STATIC
   src/net/url_builder.cpp
   src/types/accepted.cpp
   src/types/api_metadata.cpp
+  src/types/error.cpp
   src/types/index_types.cpp
   src/types/parser.cpp
   src/types/vector_metadata.cpp

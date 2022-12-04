@@ -7,6 +7,7 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
+#include "pinecone/types/error.hpp"
 #include "pinecone/util/curl_result.hpp"
 
 using json = nlohmann::json;
@@ -73,7 +74,18 @@ struct failure_reason<failure::request_failed> {
   }
 
   [[nodiscard]] constexpr auto response_code() const noexcept -> int64_t { return _response_code; }
+
   [[nodiscard]] constexpr auto body() const noexcept -> std::string const& { return _body; }
+
+  [[nodiscard]] auto api_error() const noexcept -> std::variant<types::api_error, json::exception>
+  {
+    try {
+      types::api_error err = json::parse(_body);
+      return err;
+    } catch (json::exception const& ex) {
+      return ex;
+    }
+  }
 
  private:
   int64_t _response_code;
