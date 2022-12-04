@@ -55,9 +55,7 @@ auto main(int /*argc*/, char** argv) -> int
   auto updated = client->update_vector("squad", std::move(update_req));
   std::cout << "Updated: " << updated.to_string() << std::endl;
 
-  // TODO: this construction requires users to pre-create a filter and decltype it; should provide
-  // something more ergonomic
-  auto q = pinecone::types::query<>::builder(1, "11113").with_include_metadata(true).build();
+  auto q = pinecone::types::query_builder(1, "11113").with_include_metadata(true).build();
   auto search_result = client->query("squad", q);
   std::cout << "Query result: " << search_result.to_string() << std::endl;
   std::cout << "Query result metdata:" << std::endl;

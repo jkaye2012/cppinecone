@@ -67,14 +67,13 @@ struct index_stats {
   }
 };
 
-template <typename filter = no_filter>
+template <typename filter>
 struct query {
   struct builder {
     builder(uint64_t top_k, double vector) noexcept
         : _top_k(top_k), _query(vector), _filter(filters::none())
     {
     }
-
     builder(uint64_t top_k, std::string_view vector_id) noexcept
         : _top_k(top_k), _query(vector_id), _filter(filters::none())
     {
@@ -83,7 +82,6 @@ struct query {
         : _top_k(top_k), _query(vector), _filter(std::move(f))
     {
     }
-
     builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept
         : _top_k(top_k), _query(vector_id), _filter(std::move(f))
     {
@@ -165,6 +163,30 @@ struct query {
   {
   }
 };
+
+template <typename filter = no_filter>
+inline auto query_builder(uint64_t top_k, double vector) noexcept
+{
+  return typename query<filter>::builder(top_k, vector);
+}
+
+template <typename filter = no_filter>
+inline auto query_builder(uint64_t top_k, std::string_view vector_id) noexcept
+{
+  return typename query<filter>::builder(top_k, vector_id);
+}
+
+template <typename filter>
+inline auto query_builder(filter f, uint64_t top_k, double vector) noexcept
+{
+  return typename query<filter>::builder(f, top_k, vector);
+}
+
+template <typename filter>
+inline auto query_builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept
+{
+  return typename query<filter>::builder(f, top_k, vector_id);
+}
 
 struct query_result {
   struct scored_vector {
