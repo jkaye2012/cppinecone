@@ -38,6 +38,6 @@ if [ "$1" == "--no-ninja" ]; then
     exit 0
 fi
 
-cd build || exit 254
+cd "$BUILD_DIR" || exit 254
 # shellcheck disable=SC2068
 ninja $@

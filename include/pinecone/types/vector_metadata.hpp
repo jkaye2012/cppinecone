@@ -17,6 +17,7 @@ using json = nlohmann::json;
 namespace pinecone::types
 {
 enum class binary_operator {
+  unknown,
   eq,
   ne,
   gt,
@@ -25,53 +26,36 @@ enum class binary_operator {
   lte,
 };
 
-constexpr auto to_string(binary_operator binop) noexcept -> std::string_view
-{
-  switch (binop) {
-    case binary_operator::eq:
-      return "$eq";
-    case binary_operator::ne:
-      return "$ne";
-    case binary_operator::gt:
-      return "$gt";
-    case binary_operator::gte:
-      return "$gte";
-    case binary_operator::lt:
-      return "$lt";
-    case binary_operator::lte:
-      return "$lte";
-  }
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(binary_operator, {{binary_operator::unknown, nullptr},
+                                               {binary_operator::eq, "$eq"},
+                                               {binary_operator::ne, "$ne"},
+                                               {binary_operator::gt, "$gt"},
+                                               {binary_operator::gte, "$gte"},
+                                               {binary_operator::lt, "$lt"},
+                                               {binary_operator::lte, "$lte"}})
 
 enum class array_operator {
+  unknown,
   in,
   nin,
 };
 
-constexpr auto to_string(array_operator arrop) noexcept -> std::string_view
-{
-  switch (arrop) {
-    case array_operator::in:
-      return "$in";
-    case array_operator::nin:
-      return "$nin";
-  }
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(array_operator, {{array_operator::unknown, nullptr},
+                                              {array_operator::in, "$in"},
+                                              {array_operator::nin, "$nin"}})
 
 enum class combination_operator {
+  unknown,
   and_,
   or_,
 };
 
-constexpr auto to_string(combination_operator combop) noexcept -> std::string_view
-{
-  switch (combop) {
-    case combination_operator::and_:
-      return "$and";
-    case combination_operator::or_:
-      return "$or";
-  }
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(combination_operator, {{combination_operator::unknown, nullptr},
+                                                    {combination_operator::and_, "$and"},
+                                                    {combination_operator::or_, "$or"}})
 
 struct metadata_value {
   using value_type = std::variant<bool, int64_t, double, std::string>;
@@ -88,17 +72,9 @@ struct metadata_value {
 
   [[nodiscard]] auto var() const noexcept -> value_type const& { return _var; }
 
-  [[nodiscard]] auto to_string() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const metadata_value& nlohmann_json_t)
   {
-    return std::visit(
-        [](auto const& v) {
-          if constexpr (std::is_same_v<std::decay_t<decltype(v)>, std::string>) {
-            return v;
-          } else {
-            return std::to_string(v);
-          }
-        },
-        _var);
+    std::visit([&nlohmann_json_j](auto const& v) { nlohmann_json_j = v; }, nlohmann_json_t._var);
   }
 
  private:
@@ -106,6 +82,7 @@ struct metadata_value {
 };
 
 struct metadata {
+  metadata() = default;
   explicit metadata(std::unordered_map<std::string, metadata_value> values) noexcept
       : _values(std::move(values))
   {
@@ -117,10 +94,17 @@ struct metadata {
     return _values;
   }
 
-  static auto build(json const& api_result) -> util::result<metadata>
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const metadata& nlohmann_json_t)
+  {
+    for (auto const& [key, value] : nlohmann_json_t._values) {
+      std::visit([&, k = key](auto const& v) { nlohmann_json_j[k] = v; }, value.var());
+    }
+  }
+
+  friend void from_json(const nlohmann ::json& nlohmann_json_j, metadata& nlohmann_json_t)
   {
     std::unordered_map<std::string, metadata_value> values;
-    for (auto const& [key, value] : api_result.items()) {
+    for (auto const& [key, value] : nlohmann_json_j.items()) {
       if (value.is_boolean()) {
         values.emplace(key, value.get<bool>());
       } else if (value.is_number_integer()) {
@@ -130,48 +114,33 @@ struct metadata {
       } else if (value.is_string()) {
         values.emplace(key, value.get<std::string>());
       } else {
-        return {"Metadata value was not a boolean, integer, float, or string"};
+        // TODO: handle failure
+        // return {"Metadata value was not a boolean, integer, float, or string"};
       }
     }
 
-    return metadata(std::move(values));
-  }
-
-  auto serialize(json& obj) const noexcept -> void
-  {
-    obj = json::object({});
-    for (auto const& [key, value] : _values) {
-      std::visit([&, k = key](auto const& v) { obj[k] = v; }, value.var());
-    }
+    nlohmann_json_t._values = std::move(values);
   }
 
  private:
   std::unordered_map<std::string, metadata_value> _values;
 };
 
-constexpr auto to_json(json& j, metadata_value const& value) -> void
-{
-  std::visit([&j](auto const& v) -> void { j = v; }, value.var());
-}
-
 template <typename Derived>
 struct filter_base {
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const filter_base& nlohmann_json_t)
   {
-    json result{{"filter", json::object()}};
-    static_cast<Derived const*>(this)->serialize_impl(result["filter"]);
-    return result.dump();
-  }
-
-  auto serialize(json& obj) const noexcept -> void
-  {
-    obj["filter"] = json::object();
-    static_cast<Derived const*>(this)->serialize_impl(obj["filter"]);
+    nlohmann_json_j["filter"] = json::object();
+    to_json(nlohmann_json_j["filter"], static_cast<Derived const&>(nlohmann_json_t));
   }
 };
 
 struct binary_filter : public filter_base<binary_filter> {
-  auto serialize_impl(json& obj) const noexcept -> void { obj[_key] = {{to_string(_op), _value}}; }
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const binary_filter& nlohmann_json_t)
+  {
+    json j = nlohmann_json_t._op;
+    nlohmann_json_j[nlohmann_json_t._key][j] = nlohmann_json_t._value;
+  }
 
   binary_filter(std::string key, binary_operator op, metadata_value value) noexcept
       : _key(std::move(key)), _op(op), _value(std::move(value))
@@ -187,12 +156,12 @@ struct binary_filter : public filter_base<binary_filter> {
 // iter must support .begin() and .end(), and the value type must be convertible to metadata_value
 template <typename iter>
 struct array_filter : public filter_base<array_filter<iter>> {
-  auto serialize_impl(json& obj) const noexcept -> void
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const array_filter& nlohmann_json_t)
   {
-    auto opstr = to_string(_op);
-    obj[_key] = {{opstr, json::array()}};
-    auto& arr = obj[_key][opstr];
-    for (auto const& v : _values) {
+    json j = nlohmann_json_t._op;
+    nlohmann_json_j[nlohmann_json_t._key][j] = json::array();
+    auto& arr = nlohmann_json_j[nlohmann_json_t._key][j];
+    for (auto const& v : nlohmann_json_t._values) {
       arr.emplace_back(v);
     }
   }
@@ -211,7 +180,7 @@ struct array_filter : public filter_base<array_filter<iter>> {
 template <typename filter>
 auto serialize_expand(json& arr, filter const& f) -> void
 {
-  f.serialize_impl(arr.emplace_back());
+  to_json(arr.emplace_back(), f);
 }
 
 template <typename filter, typename... filters>
@@ -224,13 +193,13 @@ auto serialize_expand(json& arr, filter const& f, filters const&... fs) -> void
 // each ts must be one of binary_filter, array_filter, or combination_filter
 template <typename... ts>
 struct combination_filter : public filter_base<combination_filter<ts...>> {
-  auto serialize_impl(json& obj) const noexcept -> void
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const combination_filter& nlohmann_json_t)
   {
-    auto opstr = to_string(_op);
-    obj[opstr] = json::array();
-    auto& arr = obj[opstr];
+    json j = nlohmann_json_t._op;
+    nlohmann_json_j[j] = json::array();
+    auto& arr = nlohmann_json_j[j];
     std::apply([&arr](auto const&... filter) -> void { serialize_expand(arr, filter...); },
-               _filters);
+               nlohmann_json_t._filters);
   }
 
   // NOLINTNEXTLINE
@@ -245,6 +214,9 @@ struct combination_filter : public filter_base<combination_filter<ts...>> {
 };
 
 struct no_filter : public filter_base<no_filter> {
-  auto serialize_impl(json& obj) const noexcept -> void {}
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const no_filter& /*nlohmann_json_t*/)
+  {
+    nlohmann_json_j = json::object({});
+  }
 };
 }  // namespace pinecone::types

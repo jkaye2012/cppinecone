@@ -35,8 +35,8 @@ struct url_builder {
   {
     if constexpr (domain::op_api_type(op) == domain::api_type::service) {
       std::ostringstream oss;
-      oss << "https://" << index_name << "-" << _metadata.project_name() << ".svc." << _environment
-          << ".pinecone.io" << domain::op_url_fragment(op);
+      oss << "https://" << index_name << "-" << _metadata.md_project_name() << ".svc."
+          << _environment << ".pinecone.io" << domain::op_url_fragment(op);
       return oss.str();
     }
   }

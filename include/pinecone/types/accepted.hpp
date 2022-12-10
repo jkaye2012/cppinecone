@@ -8,16 +8,11 @@
 namespace pinecone::types
 {
 struct accepted {
-  static auto build(std::vector<uint8_t>& data) noexcept -> util::result<accepted>
-  {
-    return {accepted(data)};
-  }
+  explicit accepted(std::vector<uint8_t>& data) noexcept : _result(data.begin(), data.end()) {}
 
   [[nodiscard]] auto result() const noexcept -> std::string_view { return _result; }
 
  private:
   std::string _result;
-
-  explicit accepted(std::vector<uint8_t>& data) noexcept : _result(data.begin(), data.end()) {}
 };
 }  // namespace pinecone::types

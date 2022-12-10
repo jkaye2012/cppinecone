@@ -13,6 +13,7 @@ while (("$#")); do
         echo "Options:"
         echo "  -h, --help      Show this help message and exit."
         echo "  -r, --retag     Rebuild and tag the Docker image locally."
+        exit 0
         ;;
     -r | --retag)
         SHOULD_RETAG=1

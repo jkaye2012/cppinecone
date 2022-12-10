@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"
 #include "pinecone/types/accepted.hpp"
@@ -10,7 +13,8 @@ namespace pinecone::domain
 {
 template <>
 struct operation_args<operation_type::index_list>
-    : public list_operation_args<operation_type::index_list>, public types::parser<types::indexes> {
+    : public list_operation_args<operation_type::index_list>,
+      public types::parser<std::vector<std::string>> {
   using list_operation_args::list_operation_args;
 };
 
@@ -31,7 +35,7 @@ struct operation_args<operation_type::index_delete>
 template <>
 struct operation_args<operation_type::collection_list>
     : public list_operation_args<operation_type::collection_list>,
-      public types::parser<types::collections> {
+      public types::parser<std::vector<std::string>> {
   using list_operation_args::list_operation_args;
 };
 

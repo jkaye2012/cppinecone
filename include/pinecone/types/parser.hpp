@@ -20,10 +20,11 @@ struct parser {
   [[nodiscard]] auto parse(std::vector<uint8_t>& data) const -> util::result<T>
   {
     if constexpr (Json) {
-      return parsed_type::build(json::parse(data));
+      T parsed = json::parse(data);
+      return parsed;
+    } else {
+      return accepted{data};
     }
-
-    return parsed_type::build(data);
   }
 };
 

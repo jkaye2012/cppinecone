@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "pinecone/domain/index_operations.hpp"
 #include "pinecone/domain/meta_operations.hpp"
@@ -62,7 +63,8 @@ struct pinecone_client {
     return _http_client->request(args<type::index_create>{_url_builder, std::move(index)});
   }
 
-  [[nodiscard]] auto list_indexes() const noexcept -> util::result<types::indexes>
+  // TODO: consider whether directly exposing vector here and below is a good idea
+  [[nodiscard]] auto list_indexes() const noexcept -> util::result<std::vector<std::string>>
   {
     return _http_client->request(args<type::index_list>{_url_builder});
   }
@@ -77,8 +79,7 @@ struct pinecone_client {
                                      types::index_configuration config) const noexcept
       -> util::result<types::accepted>
   {
-    return _http_client->request(
-        args<type::index_configure>(_url_builder, name, std::move(config)));
+    return _http_client->request(args<type::index_configure>(_url_builder, name, config));
   }
 
   [[nodiscard]] auto delete_index(std::string_view name) const noexcept
@@ -87,7 +88,7 @@ struct pinecone_client {
     return _http_client->request(args<type::index_delete>{_url_builder, name});
   }
 
-  [[nodiscard]] auto list_collections() const noexcept -> util::result<types::collections>
+  [[nodiscard]] auto list_collections() const noexcept -> util::result<std::vector<std::string>>
   {
     return _http_client->request(args<type::collection_list>{_url_builder});
   }

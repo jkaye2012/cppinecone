@@ -62,8 +62,11 @@ template <operation_type op, typename Body>
 struct patch_operation_args : public arg_base {
   patch_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
                        Body body) noexcept
-      : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
+      : arg_base(build_url<op>(url_builder, resource_name))
   {
+    json j;
+    to_json(j, body);
+    _body = j.dump();
   }
 
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
@@ -75,8 +78,12 @@ struct patch_operation_args : public arg_base {
 template <operation_type op, typename Body>
 struct create_operation_args : public arg_base {
   create_operation_args(net::url_builder const& url_builder, Body body) noexcept
-      : arg_base(url_builder.build<op>()), _body(body.serialize())
+      : arg_base(url_builder.build<op>())
   {
+    // TODO: remove duplication
+    json j;
+    to_json(j, body);
+    _body = j.dump();
   }
 
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
@@ -89,8 +96,12 @@ template <operation_type op, typename Body>
 struct vector_operation_args : public arg_base {
   vector_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
                         Body body) noexcept
-      : arg_base(build_url<op>(url_builder, resource_name)), _body(body.serialize())
+      : arg_base(build_url<op>(url_builder, resource_name))
   {
+    // TODO: remove duplication
+    json j;
+    to_json(j, body);
+    _body = j.dump();
   }
 
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }

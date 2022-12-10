@@ -20,51 +20,37 @@ namespace pinecone::types
 {
 struct index_stats {
   struct namespace_summary {
-    explicit namespace_summary(uint64_t vector_count) noexcept : _vector_count(vector_count) {}
+    [[nodiscard]] auto vector_count() const noexcept -> uint64_t { return vectorCount; }
 
-    [[nodiscard]] auto vector_count() const noexcept -> uint64_t { return _vector_count; }
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(namespace_summary, vectorCount)
 
    private:
-    uint64_t _vector_count;
+    uint64_t vectorCount;
   };
 
-  static auto build(json api_result) -> util::result<index_stats>
-  {
-    std::unordered_map<std::string, namespace_summary> namespaces;
-    for (auto const& ns : api_result["namespaces"].items()) {
-      namespaces.emplace(ns.key(), namespace_summary(std::move(ns.value()["vectorCount"])));
-    }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(index_stats, namespaces, dimension, indexFullness,
+                                 totalVectorCount)
 
-    return index_stats(std::move(namespaces), api_result["dimension"], api_result["indexFullness"],
-                       api_result["totalVectorCount"]);
-  }
-
-  [[nodiscard]] auto namespaces() const noexcept
+  [[nodiscard]] auto stat_namespaces() const noexcept
       -> std::unordered_map<std::string, namespace_summary> const&
   {
-    return _namespaces;
+    return namespaces;
   }
 
-  [[nodiscard]] auto dimension() const noexcept -> uint64_t { return _dimension; }
+  [[nodiscard]] auto stat_dimension() const noexcept -> uint64_t { return dimension; }
 
-  [[nodiscard]] auto index_fullness() const noexcept -> double { return _index_fullness; }
+  [[nodiscard]] auto stat_index_fullness() const noexcept -> double { return indexFullness; }
 
-  [[nodiscard]] auto total_vector_count() const noexcept -> uint64_t { return _total_vector_count; }
+  [[nodiscard]] auto stat_total_vector_count() const noexcept -> uint64_t
+  {
+    return totalVectorCount;
+  }
 
  private:
-  std::unordered_map<std::string, namespace_summary> _namespaces;
-  uint64_t _dimension;
-  double _index_fullness;
-  uint64_t _total_vector_count;
-
-  index_stats(std::unordered_map<std::string, namespace_summary> namespaces, uint64_t dimension,
-              double index_fullness, uint64_t total_vector_count) noexcept
-      : _namespaces(std::move(namespaces)),
-        _dimension(dimension),
-        _index_fullness(index_fullness),
-        _total_vector_count(total_vector_count)
-  {
-  }
+  std::unordered_map<std::string, namespace_summary> namespaces;
+  uint64_t dimension;
+  double indexFullness;
+  uint64_t totalVectorCount;
 };
 
 template <typename filter>
@@ -119,28 +105,26 @@ struct query {
     std::optional<bool> _include_metadata;
   };
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const query& nlohmann_json_t)
   {
-    json repr = {{"topK", _top_k}};
+    to_json(nlohmann_json_j["filter"], nlohmann_json_t._filter);
+    nlohmann_json_j["topK"] = nlohmann_json_t._top_k;
 
-    if (std::holds_alternative<double>(_query)) {
-      repr["vector"] = std::get<double>(_query);
-    } else if (std::holds_alternative<std::string_view>(_query)) {
-      repr["id"] = std::get<std::string_view>(_query);
-    }
-
-    _filter.serialize(repr);
-    if (_namespace) {
-      repr["namespace"] = *_namespace;
-    }
-    if (_include_values) {
-      repr["includeValues"] = *_include_values;
-    }
-    if (_include_metadata) {
-      repr["includeMetadata"] = *_include_metadata;
+    if (std::holds_alternative<double>(nlohmann_json_t._query)) {
+      nlohmann_json_j["vector"] = std::get<double>(nlohmann_json_t._query);
+    } else if (std::holds_alternative<std::string_view>(nlohmann_json_t._query)) {
+      nlohmann_json_j["id"] = std::get<std::string_view>(nlohmann_json_t._query);
     }
 
-    return repr.dump();
+    if (nlohmann_json_t._namespace) {
+      nlohmann_json_j["namespace"] = *nlohmann_json_t._namespace;
+    }
+    if (nlohmann_json_t._include_values) {
+      nlohmann_json_j["includeValues"] = *nlohmann_json_t._include_values;
+    }
+    if (nlohmann_json_t._include_metadata) {
+      nlohmann_json_j["includeMetadata"] = *nlohmann_json_t._include_metadata;
+    }
   }
 
  private:
@@ -201,24 +185,20 @@ struct query_result {
 
     [[nodiscard]] auto md() const noexcept -> std::optional<metadata> const& { return _metadata; }
 
-    static auto build(json& api_result) -> util::result<scored_vector>
+    friend void from_json(const nlohmann ::json& nlohmann_json_j, scored_vector& nlohmann_json_t)
     {
-      std::optional<std::vector<double>> values;
-      if (api_result.contains("values")) {
-        values = api_result["values"];
+      if (nlohmann_json_j.contains("values")) {
+        nlohmann_json_t._values = nlohmann_json_j["values"];
       }
 
-      std::optional<metadata> md;
-      if (api_result.contains("metadata")) {
-        auto md_result = metadata::build(api_result["metadata"]);
-        if (md_result.is_failed()) {
-          return md_result.propagate<scored_vector>();
-        }
-        md = *md_result;
+      if (nlohmann_json_j.contains("metadata")) {
+        metadata m;
+        from_json(nlohmann_json_j["metadata"], m);
+        nlohmann_json_t._metadata = std::move(m);
       }
 
-      return scored_vector(std::move(api_result["id"]), api_result["score"], std::move(values),
-                           std::move(md));
+      nlohmann_json_j.at("id").get_to(nlohmann_json_t._id);
+      nlohmann_json_j.at("score").get_to(nlohmann_json_t._score);
     }
 
    private:
@@ -226,43 +206,24 @@ struct query_result {
     double _score;
     std::optional<std::vector<double>> _values;
     std::optional<metadata> _metadata;
-
-    scored_vector(std::string id, double score, std::optional<std::vector<double>> values,
-                  std::optional<metadata> md) noexcept
-        : _id(std::move(id)), _score(score), _values(std::move(values)), _metadata(std::move(md))
-    {
-    }
   };
 
-  static auto build(json api_result) -> util::result<query_result>
+  friend void from_json(const nlohmann ::json& nlohmann_json_j, query_result& nlohmann_json_t)
   {
-    std::vector<scored_vector> results;
-    for (auto& result : api_result["matches"]) {
-      auto sv = scored_vector::build(result);
-      if (sv.is_failed()) {
-        return sv.propagate<query_result>();
-      }
-      results.emplace_back(*sv);
-    }
-
-    return query_result{api_result["namespace"], std::move(results)};
+    nlohmann_json_j.at("namespace").get_to(nlohmann_json_t._namespace);
+    nlohmann_json_j.at("matches").get_to(nlohmann_json_t.matches);
   }
 
-  [[nodiscard]] auto ns() const noexcept -> std::string const& { return _namespace; }
+  [[nodiscard]] auto query_ns() const noexcept -> std::string const& { return _namespace; }
 
-  [[nodiscard]] auto matches() const noexcept -> std::vector<scored_vector> const&
+  [[nodiscard]] auto query_matches() const noexcept -> std::vector<scored_vector> const&
   {
-    return _matches;
+    return matches;
   }
 
  private:
   std::string _namespace;
-  std::vector<scored_vector> _matches;
-
-  query_result(std::string ns, std::vector<scored_vector> matches) noexcept
-      : _namespace(std::move(ns)), _matches(std::move(matches))
-  {
-  }
+  std::vector<scored_vector> matches;
 };
 
 using ids = std::vector<std::string_view>;
@@ -292,26 +253,22 @@ struct delete_request {
     std::optional<std::string_view> _namespace;
   };
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const delete_request& nlohmann_json_t)
   {
-    json repr = {};
-
-    if (_namespace) {
-      repr["namespace"] = *_namespace;
+    if (nlohmann_json_t._namespace) {
+      nlohmann_json_j["namespace"] = *nlohmann_json_t._namespace;
     }
 
-    if (std::holds_alternative<ids>(_mode)) {
-      repr["ids"] = json::array({});
-      for (auto const& id : std::get<ids>(_mode)) {
-        repr["ids"].emplace_back(id);
+    if (std::holds_alternative<ids>(nlohmann_json_t._mode)) {
+      nlohmann_json_j["ids"] = json::array({});
+      for (auto const& id : std::get<ids>(nlohmann_json_t._mode)) {
+        nlohmann_json_j["ids"].emplace_back(id);
       }
-    } else if (std::holds_alternative<bool>(_mode)) {
-      repr["deleteAll"] = std::get<bool>(_mode);
-    } else if (std::holds_alternative<filter>(_mode)) {
-      std::get<filter>(_mode).serialize(repr);
+    } else if (std::holds_alternative<bool>(nlohmann_json_t._mode)) {
+      nlohmann_json_j["deleteAll"] = std::get<bool>(nlohmann_json_t._mode);
+    } else if (std::holds_alternative<filter>(nlohmann_json_t._mode)) {
+      to_json(nlohmann_json_j, std::get<filter>(nlohmann_json_t._mode));
     }
-
-    return repr.dump();
   }
 
  private:
@@ -325,6 +282,7 @@ struct delete_request {
 };
 
 struct vector {
+  vector() = default;
   vector(std::string id, std::vector<double> values) noexcept
       : _id(std::move(id)), _values(std::move(values)), _metadata(std::nullopt)
   {
@@ -341,29 +299,25 @@ struct vector {
 
   [[nodiscard]] auto md() const noexcept -> std::optional<metadata> const& { return _metadata; }
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const vector& nlohmann_json_t)
   {
-    json repr = {{"id", _id}, {"values", _values}};
-    if (_metadata) {
-      _metadata->serialize(repr["metadata"]);
+    nlohmann_json_j["id"] = nlohmann_json_t._id;
+    nlohmann_json_j["values"] = nlohmann_json_t._values;
+    if (nlohmann_json_t._metadata) {
+      nlohmann_json_j["metadata"] = *nlohmann_json_t._metadata;
     }
-    return repr.dump();
   }
 
-  [[nodiscard]] static auto build(json api_result) -> util::result<vector>
+  friend void from_json(const nlohmann ::json& nlohmann_json_j, vector& nlohmann_json_t)
   {
-    std::optional<metadata> md;
-    if (api_result.contains("metadata")) {
-      auto md_result = metadata::build(api_result["metadata"]);
-      if (md_result.is_failed()) {
-        return md_result.propagate<vector>();
-      }
-      md = *md_result;
+    if (nlohmann_json_j.contains("metadata")) {
+      metadata m;
+      nlohmann_json_j.at("metadata").get_to(m);
+      nlohmann_json_t._metadata = std::move(m);
     }
 
-    std::vector<double> values = api_result["values"];
-
-    return vector(std::move(api_result["id"]), std::move(values), std::move(md));
+    nlohmann_json_j.at("values").get_to(nlohmann_json_t._values);
+    nlohmann_json_j.at("id").get_to(nlohmann_json_t._id);
   }
 
  private:
@@ -389,18 +343,13 @@ struct upsert_request {
     std::optional<std::string_view> _namespace;
   };
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const upsert_request& nlohmann_json_t)
   {
-    json repr = {{"vectors", json::array({})}};
-    for (auto const& vector : _vectors) {
-      repr["vectors"].emplace_back(json::parse(vector.serialize()));
-    }
+    nlohmann_json_j["vectors"] = nlohmann_json_t._vectors;
 
-    if (_namespace) {
-      repr["namespace"] = *_namespace;
+    if (nlohmann_json_t._namespace) {
+      nlohmann_json_j["namespace"] = *nlohmann_json_t._namespace;
     }
-
-    return repr.dump();
   }
 
  private:
@@ -447,20 +396,18 @@ struct update_request {
     std::optional<std::string_view> _namespace;
   };
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const update_request& nlohmann_json_t)
   {
-    json repr = {{"id", _id}};
-    if (_values) {
-      repr["values"] = *_values;
+    nlohmann_json_j["id"] = nlohmann_json_t._id;
+    if (nlohmann_json_t._values) {
+      nlohmann_json_j["values"] = *nlohmann_json_t._values;
     }
-    if (_metadata) {
-      _metadata->serialize(repr["setMetadata"]);
+    if (nlohmann_json_t._metadata) {
+      to_json(nlohmann_json_j["setMetadata"], *nlohmann_json_t._metadata);
     }
-    if (_namespace) {
-      repr["namespace"] = *_namespace;
+    if (nlohmann_json_t._namespace) {
+      nlohmann_json_j["namespace"] = *nlohmann_json_t._namespace;
     }
-
-    return repr.dump();
   }
 
  private:

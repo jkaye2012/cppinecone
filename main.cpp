@@ -24,43 +24,52 @@ auto main(int /*argc*/, char** argv) -> int
   auto and_ =
       pinecone::types::combination_filter(pinecone::types::combination_operator::and_, bin, arr);
 
-  std::cout << bin.serialize() << std::endl;
-  std::cout << arr.serialize() << std::endl;
-  std::cout << and_.serialize() << std::endl;
+  json j = and_;
+  std::cout << j.dump() << std::endl;
 
   auto example2 = pf::and_(pf::eq("title", "Physics"), pf::eq("author", "Bob"));
-  std::cout << example2.serialize() << std::endl;
+  json je = example2;
+  std::cout << je.dump() << std::endl;
 
   auto indexes = client->list_indexes();
-  std::cout << "Num indexes: " << indexes->names().size() << std::endl;
+  std::cout << "Num indexes: " << indexes->size() << std::endl;
 
   auto collections = client->list_collections();
-  std::cout << "Num collections: " << collections->names().size() << std::endl;
+  std::cout << "Num collections: " << collections->size() << std::endl;
 
-  auto configure_result = client->configure_index(
-      "squad", {1, pinecone::types::pod_configuration(pinecone::types::pod_type::s1,
-                                                      pinecone::types::pod_size::x1)});
+  pinecone::types::index_configuration config{
+      1, pinecone::types::pod_configuration(pinecone::types::pod_type::s1,
+                                            pinecone::types::pod_size::x1)};
+  json jc = config;
+  auto configure_result = client->configure_index("squad", config);
+  std::cout << jc.dump() << std::endl;
   std::cout << configure_result.to_string() << std::endl;
 
   auto unfiltered_stats = client->describe_index_stats("squad", pf::none());
-  std::cout << "Unfiltered: " << unfiltered_stats->namespaces().at("").vector_count() << std::endl;
+  std::cout << unfiltered_stats.to_string() << std::endl;
+  std::cout << "Unfiltered: " << unfiltered_stats->stat_namespaces().at("").vector_count()
+            << std::endl;
 
   auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
-  std::cout << "Filtered: " << filtered_stats->namespaces().at("").vector_count() << std::endl;
+  std::cout << "Filtered: " << filtered_stats->stat_namespaces().at("").vector_count() << std::endl;
 
   pinecone::types::metadata update_md{{{"Testing", "A thing"}}};
   auto update_req =
       pinecone::types::update_request::builder("11113").with_metadata(std::move(update_md)).build();
-  std::cout << update_req.serialize() << std::endl;
+  json ju = update_req;
+  std::cout << ju.dump() << std::endl;
   auto updated = client->update_vector("squad", std::move(update_req));
   std::cout << "Updated: " << updated.to_string() << std::endl;
 
   auto q = pinecone::types::query_builder(1, "11113").with_include_metadata(true).build();
   auto search_result = client->query("squad", q);
+  json jq = q;
+  std::cout << "Query request: " << jq.dump() << std::endl;
   std::cout << "Query result: " << search_result.to_string() << std::endl;
   std::cout << "Query result metdata:" << std::endl;
-  for (auto const& [k, v] : search_result->matches().at(0).md()->values()) {
-    std::cout << k << ": " << v.to_string() << std::endl;
+  for (auto const& [k, v] : search_result->query_matches().at(0).md()->values()) {
+    json jv = v;
+    std::cout << k << ": " << jv.dump() << std::endl;
   }
 
   // auto delete_result = client->delete_index("squad");
@@ -76,12 +85,13 @@ auto main(int /*argc*/, char** argv) -> int
   // auto created = client->create_collection({"squad-test-collection", "squad"});
   // std::cout << "Created: " << created.to_string() << std::endl;
 
-  for (auto const& idx : indexes->names()) {
+  for (auto const& idx : *indexes) {
     std::cout << idx << std::endl;
   }
 
   auto db = client->describe_index("squad");
-  std::cout << db->dimension() << std::endl;
+  std::cout << db.to_string() << std::endl;
+  std::cout << db->db_detail().db_dimension() << std::endl;
 
   // auto del_req = pinecone::types::delete_request<>::builder().build();
   // auto del_res = client->delete_vectors("squad", del_req);

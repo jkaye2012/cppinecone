@@ -25,142 +25,88 @@ enum class database_state {
   ready
 };
 
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(database_state, {{database_state::unknown, nullptr},
+                                              {database_state::initializing, "initializing"},
+                                              {database_state::scaling_up, "scaling_up"},
+                                              {database_state::scaling_down, "scaling_down"},
+                                              {database_state::terminating, "terminating"},
+                                              {database_state::ready, "ready"}})
+
 /**
  * @brief Pod types for individual databases.
  */
 enum class pod_type {
+  unknown,
   s1,
   p1,
   p2
 };
 
-inline auto to_string(pod_type type) noexcept -> std::string
-{
-  switch (type) {
-    case pod_type::s1:
-      return "s1";
-    case pod_type::p1:
-      return "p1";
-    case pod_type::p2:
-      return "p2";
-  }
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(pod_type, {{pod_type::unknown, nullptr},
+                                        {pod_type::s1, "s1"},
+                                        {pod_type::p1, "p1"},
+                                        {pod_type::p2, "p2"}})
 
 /**
  * @brief Pod sizes for individual databases.
  */
 enum class pod_size {
+  unknown,
   x1,
   x2,
   x4,
   x8
 };
 
-inline auto to_string(pod_size size) noexcept -> std::string
-{
-  switch (size) {
-    case pod_size::x1:
-      return "x1";
-    case pod_size::x2:
-      return "x2";
-    case pod_size::x4:
-      return "x4";
-    case pod_size::x8:
-      return "x8";
-  }
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(pod_size, {{pod_size::unknown, nullptr},
+                                        {pod_size::x1, "x1"},
+                                        {pod_size::x2, "x2"},
+                                        {pod_size::x4, "x4"},
+                                        {pod_size::x8, "x8"}})
 
 /**
  * @brief Metric types for individual databases.
  */
 enum class metric_type {
+  unknown,
   euclidean,
   cosine,
   dotproduct
 };
 
-inline auto to_string(metric_type type) noexcept -> std::string
-{
-  switch (type) {
-    case metric_type::euclidean:
-      return "euclidean";
-    case metric_type::cosine:
-      return "cosine";
-    case metric_type::dotproduct:
-      return "dotproduct";
-  }
-}
-
-inline auto parse_metric(std::string const& metric) -> util::result<metric_type>
-{
-  if (metric == "euclidean") {
-    return metric_type::euclidean;
-  }
-  if (metric == "cosine") {
-    return metric_type::cosine;
-  }
-  if (metric == "dotproduct") {
-    return metric_type::dotproduct;
-  }
-  return {"failed to parse metric type"};
-}
+// NOLINTNEXTLINE
+NLOHMANN_JSON_SERIALIZE_ENUM(metric_type, {{metric_type::unknown, nullptr},
+                                           {metric_type::euclidean, "euclidean"},
+                                           {metric_type::cosine, "cosine"},
+                                           {metric_type::dotproduct, "dotproduct"}})
 
 /**
  * @brief Pod configuration for an individual index.
  */
 struct pod_configuration {
-  /**
-   * @brief Constructs a new pod configuration.
-   *
-   * @param type the pod type
-   * @param size the pod size
-   */
+  pod_configuration() = default;
   pod_configuration(pod_type type, pod_size size) noexcept : _type(type), _size(size) {}
 
-  /**
-   * @return the pod type
-   */
   [[nodiscard]] auto type() const noexcept -> pod_type { return _type; }
-
-  /**
-   * @return the pod size
-   */
   [[nodiscard]] auto size() const noexcept -> pod_size { return _size; }
 
-  [[nodiscard]] static auto build(std::string const& config) -> util::result<pod_configuration>
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const pod_configuration& nlohmann_json_t)
   {
-    auto type_str = config.substr(0, 2);
-    pod_type type{};
-    if (type_str == "s1") {
-      type = pod_type::s1;
-    } else if (type_str == "p1") {
-      type = pod_type::p1;
-    } else if (type_str == "p2") {
-      type = pod_type::p2;
-    } else {
-      return {"failed to parse pod type"};
-    }
-
-    auto size_str = config.substr(3);
-    pod_size size{};
-    if (size_str == "x1") {
-      size = pod_size::x1;
-    } else if (size_str == "x2") {
-      size = pod_size::x2;
-    } else if (size_str == "x4") {
-      size = pod_size::x4;
-    } else if (size_str == "x8") {
-      size = pod_size::x8;
-    } else {
-      return {"failed to parse pod size"};
-    }
-
-    return pod_configuration(type, size);
+    json typestr = nlohmann_json_t._type;
+    json sizestr = nlohmann_json_t._size;
+    nlohmann_json_j = typestr.get<std::string>() + "." + sizestr.get<std::string>();
   }
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void from_json(const nlohmann ::json& nlohmann_json_j, pod_configuration& nlohmann_json_t)
   {
-    return to_string(_type) + "." + to_string(_size);
+    std::string const& pod_type = nlohmann_json_j.get<std::string>();
+    json type_str = pod_type.substr(0, 2);
+    json size_str = pod_type.substr(3);
+    type_str.get_to(nlohmann_json_t._type);
+    size_str.get_to(nlohmann_json_t._size);
   }
 
  private:
@@ -168,191 +114,101 @@ struct pod_configuration {
   pod_size _size;
 };
 
-[[nodiscard]] constexpr auto from_string(std::string_view str) noexcept -> database_state
-{
-  if (str == "Initializing") {
-    return database_state::initializing;
-  }
-  if (str == "ScalingUp") {
-    return database_state::scaling_up;
-  }
-  if (str == "ScalingDown") {
-    return database_state::scaling_down;
-  }
-  if (str == "Terminating") {
-    return database_state::terminating;
-  }
-  if (str == "Ready") {
-    return database_state::ready;
-  }
-
-  return database_state::unknown;
-}
-
 /**
  * @brief The status of an individual database.
  */
 struct database_status {
-  /**
-   * @brief Constructs a database status from its json representation.
-   * @details
-   * This function is allowed to throw to allow for easier composition in higher-order parsers; as
-   * such, it should only be called from within other parsers to ensure that exceptions do not
-   * escape.
-   */
-  [[nodiscard]] static auto build(json api_result) -> database_status
-  {
-    std::string const& state(api_result["state"]);
-    return {database_status(api_result["ready"], from_string(state))};
-  }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_status, ready, state)
 
  private:
-  bool _ready;
-  database_state _state;
-
-  constexpr database_status(bool ready, database_state state) noexcept
-      : _ready(ready), _state(state)
-  {
-  }
+  bool ready;
+  database_state state;
 };
 
 /**
  * @brief The complete description of an individual database.
  */
-struct database {
-  [[nodiscard]] constexpr auto name() const noexcept -> std::string const& { return _name; }
-  [[nodiscard]] constexpr auto dimension() const noexcept -> uint32_t { return _dimension; }
-  [[nodiscard]] constexpr auto metric() const noexcept -> metric_type { return _metric; }
-  [[nodiscard]] constexpr auto pod_type() const noexcept -> pod_configuration const&
+struct database_detail {
+  [[nodiscard]] constexpr auto db_name() const noexcept -> std::string const& { return name; }
+  [[nodiscard]] constexpr auto db_dimension() const noexcept -> uint32_t { return dimension; }
+  [[nodiscard]] constexpr auto db_metric() const noexcept -> metric_type { return metric; }
+  [[nodiscard]] constexpr auto db_pod_type() const noexcept -> pod_configuration const&
   {
-    return _pod_config;
+    return pod_type;
   }
-  [[nodiscard]] constexpr auto pods() const noexcept -> uint16_t { return _pods; }
-  [[nodiscard]] constexpr auto replicas() const noexcept -> uint16_t { return _replicas; }
-  [[nodiscard]] constexpr auto shards() const noexcept -> uint16_t { return _shards; }
-  [[nodiscard]] constexpr auto status() const noexcept -> database_status const& { return _status; }
+  [[nodiscard]] constexpr auto db_pods() const noexcept -> uint16_t { return pods; }
+  [[nodiscard]] constexpr auto db_replicas() const noexcept -> uint16_t { return replicas; }
+  [[nodiscard]] constexpr auto db_shards() const noexcept -> uint16_t { return shards; }
 
-  static auto build(json api_result) -> util::result<database>
-  {
-    auto status = database_status::build(api_result["status"]);
-    auto json_db = api_result["database"];
-
-    auto metric = parse_metric(json_db["metric"]);
-    if (metric.is_failed()) {
-      return metric.propagate<database>();
-    }
-
-    auto pod_config = pod_configuration::build(json_db["pod_type"]);
-    if (pod_config.is_failed()) {
-      return pod_config.propagate<database>();
-    }
-
-    return database(json_db["name"], json_db["dimension"], *metric, *pod_config, json_db["pods"],
-                    json_db["replicas"], json_db["shards"], status);
-  }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_detail, name, dimension, metric, pod_type, pods, replicas,
+                                 shards)
 
  private:
-  std::string _name;
-  uint32_t _dimension;
-  metric_type _metric;
-  pod_configuration _pod_config;
-  uint16_t _pods;
-  uint16_t _replicas;
-  uint16_t _shards;
-  database_status _status;
+  std::string name;
+  uint32_t dimension;
+  metric_type metric;
+  pod_configuration pod_type;
+  uint16_t pods;
+  uint16_t replicas;
+  uint16_t shards;
+};
 
-  database(std::string name, uint32_t dimension, metric_type metric, pod_configuration pod_config,
-           uint16_t pods, uint16_t replicas, uint16_t shards, database_status status) noexcept
-      : _name(std::move(name)),
-        _dimension(dimension),
-        _metric(metric),
-        _pod_config(pod_config),
-        _pods(pods),
-        _replicas(replicas),
-        _shards(shards),
-        _status(status)
-  {
-  }
+struct database {
+  [[nodiscard]] auto db_status() const noexcept -> database_status { return status; }
+  [[nodiscard]] auto db_detail() const noexcept -> database_detail { return database; }
+
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(database, status, database);
+
+ private:
+  database_status status{};
+  database_detail database;
 };
 
 struct collection {
-  [[nodiscard]] auto name() const noexcept -> std::string { return _name; }
-  [[nodiscard]] auto size() const noexcept -> uint64_t { return _size; }
-  [[nodiscard]] auto status() const noexcept -> std::string { return _status; }
+  [[nodiscard]] auto col_name() const noexcept -> std::string { return name; }
+  [[nodiscard]] auto col_size() const noexcept -> uint64_t { return size; }
+  [[nodiscard]] auto col_status() const noexcept -> std::string { return status; }
 
-  static auto build(json api_result) -> util::result<collection>
-  {
-    return collection(api_result["name"], api_result["size"], api_result["status"]);
-  }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(collection, name, status, size)
 
  private:
-  std::string _name;
-  std::string _status;
-  uint64_t _size;
-
-  collection(std::string name, uint64_t size, std::string status) noexcept
-      : _name(std::move(name)), _status(std::move(status)), _size(size)
-  {
-  }
+  std::string name;
+  std::string status;
+  uint64_t size;
 };
-
-struct list {
-  static auto build(json api_result) -> util::result<list>
-  {
-    std::vector<std::string> names;
-    names.reserve(api_result.size());
-
-    for (auto& index : api_result) {
-      names.emplace_back(std::move(index));
-    }
-
-    return list(std::move(names));
-  }
-
-  [[nodiscard]] auto names() const noexcept -> std::vector<std::string> const& { return _names; }
-
- private:
-  std::vector<std::string> _names;
-
-  explicit list(std::vector<std::string> names) noexcept : _names(std::move(names)) {}
-};
-using indexes = list;
-using collections = list;
 
 struct index_configuration {
-  index_configuration(uint16_t replicas, pod_configuration pod_config) noexcept
-      : _replicas(replicas), _pod_config(pod_config)
+  index_configuration() = default;
+  index_configuration(uint16_t replicas, pod_configuration pod_type)
+      : replicas(replicas), pod_type(pod_type)
   {
   }
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
-  {
-    json repr = {{"replicas", _replicas}, {"pod_type", _pod_config.serialize()}};
+  [[nodiscard]] auto index_replicas() const noexcept -> uint16_t { return replicas; }
+  [[nodiscard]] auto index_pod_config() const noexcept -> pod_configuration { return pod_type; }
 
-    return repr.dump();
-  }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(index_configuration, replicas, pod_type)
 
  private:
-  uint16_t _replicas;
-  pod_configuration _pod_config;
+  uint16_t replicas;
+  pod_configuration pod_type;
 };
 
 struct new_collection {
+  new_collection() = default;
   new_collection(std::string name, std::string source) noexcept
-      : _name(std::move(name)), _source(std::move(source))
+      : name(std::move(name)), source(std::move(source))
   {
   }
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
-  {
-    json repr = {{"name", _name}, {"source", _source}};
+  [[nodiscard]] auto col_name() const noexcept -> std::string const& { return name; }
+  [[nodiscard]] auto col_source() const noexcept -> std::string const& { return source; }
 
-    return repr.dump();
-  }
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(new_collection, name, source)
 
  private:
-  std::string _name;
-  std::string _source;
+  std::string name;
+  std::string source;
 };
 
 struct new_index {
@@ -429,59 +285,59 @@ struct new_index {
     std::optional<std::string> _source_collection;
   };
 
-  [[nodiscard]] auto serialize() const noexcept -> std::string
+  friend void to_json(nlohmann ::json& nlohmann_json_j, const new_index& nlohmann_json_t)
   {
-    json repr = {{"name", _name}, {"dimension", _dimension}};
-    if (_metric) {
-      repr["metric"] = to_string(*_metric);
+    nlohmann_json_j["name"] = nlohmann_json_t.name;
+    nlohmann_json_j["dimension"] = nlohmann_json_t.dimension;
+    if (nlohmann_json_t.metric) {
+      nlohmann_json_j["metric"] = *nlohmann_json_t.metric;
     }
-    if (_pods) {
-      repr["pods"] = *_pods;
+    if (nlohmann_json_t.pods) {
+      nlohmann_json_j["pods"] = *nlohmann_json_t.pods;
     }
-    if (_pod_config) {
-      repr["pod_type"] = _pod_config->serialize();
+    if (nlohmann_json_t.pod_type) {
+      nlohmann_json_j["podConfig"] = *nlohmann_json_t.pod_type;
     }
-    if (_shards) {
-      repr["shards"] = *_shards;
+    if (nlohmann_json_t.shards) {
+      nlohmann_json_j["shards"] = *nlohmann_json_t.shards;
     }
-    if (_replicas) {
-      repr["replicas"] = *_replicas;
+    if (nlohmann_json_t.replicas) {
+      nlohmann_json_j["replicas"] = *nlohmann_json_t.replicas;
     }
-    if (_metadata_config) {
-      repr["metadata_config"] = {{"indexed", *_metadata_config}};
+    if (nlohmann_json_t.metadata_config) {
+      nlohmann_json_j["metadataConfig"] = *nlohmann_json_t.metadata_config;
     }
-    if (_source_collection) {
-      repr["source_collection"] = *_source_collection;
+    if (nlohmann_json_t.source_collection) {
+      nlohmann_json_j["sourceCollection"] = *nlohmann_json_t.source_collection;
     }
-
-    return repr.dump();
-  };
+  }
 
  private:
-  std::string _name;
-  uint16_t _dimension;
-  std::optional<metric_type> _metric;
-  std::optional<uint16_t> _pods;
-  std::optional<pod_configuration> _pod_config;
-  std::optional<uint16_t> _shards;
-  std::optional<uint16_t> _replicas;
-  std::optional<std::vector<std::string>> _metadata_config;
-  std::optional<std::string> _source_collection;
+  std::string name;
+  uint16_t dimension{};
+  std::optional<metric_type> metric;
+  std::optional<uint16_t> pods;
+  std::optional<pod_configuration> pod_type;
+  std::optional<uint16_t> shards;
+  std::optional<uint16_t> replicas;
+  std::optional<std::vector<std::string>> metadata_config;
+  std::optional<std::string> source_collection;
 
+  new_index() = default;
   new_index(std::string name, uint32_t dimension, std::optional<metric_type> metric,
             std::optional<uint16_t> pods, std::optional<pod_configuration> pod_config,
             std::optional<uint16_t> shards, std::optional<uint16_t> replicas,
             std::optional<std::vector<std::string>> metadata_config,
             std::optional<std::string> source_collection) noexcept
-      : _name(std::move(name)),
-        _dimension(dimension),
-        _metric(metric),
-        _pods(pods),
-        _pod_config(pod_config),
-        _shards(shards),
-        _replicas(replicas),
-        _metadata_config(std::move(metadata_config)),
-        _source_collection(std::move(source_collection))
+      : name(std::move(name)),
+        dimension(dimension),
+        metric(metric),
+        pods(pods),
+        pod_type(pod_config),
+        shards(shards),
+        replicas(replicas),
+        metadata_config(std::move(metadata_config)),
+        source_collection(std::move(source_collection))
   {
   }
 };
