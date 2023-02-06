@@ -16,6 +16,7 @@ namespace pinecone::util
 {
 /**
  * @brief The possible ways in which a Pinecone API call can fail.
+ *
  * @details
  * While there are many different reasons why any one of these failure modes may occur, API users
  * are likely to handle failures depending on which of these categories the failure belongs to. For
@@ -48,14 +49,25 @@ enum class failure {
   parsing_failed
 };
 
+/**
+ * @brief Data associated with the possible failure modes for Cppinecone operations.
+ *
+ * @tparam F the failure mode
+ */
 template <failure F>
 struct failure_reason {
 };
 
+/**
+ * @brief A request that was rejected by the remote API.
+ */
 template <>
 struct failure_reason<failure::request_rejected> {
   explicit constexpr failure_reason(curl_result::error_type err) noexcept : _curl_err(err) {}
 
+  /**
+   * @returns the CURL error resulting from the failed request
+   */
   [[nodiscard]] constexpr auto curl_error() const noexcept -> curl_result::error_type
   {
     return _curl_err;
@@ -66,6 +78,9 @@ struct failure_reason<failure::request_rejected> {
 };
 using request_rejected = failure_reason<failure::request_rejected>;
 
+/**
+ * @brief A request that was processed by the remote API, but failed during processing.
+ */
 template <>
 struct failure_reason<failure::request_failed> {
   failure_reason(int64_t code, std::string body) noexcept
@@ -73,10 +88,21 @@ struct failure_reason<failure::request_failed> {
   {
   }
 
+  /**
+   * @returns the HTTP response code returned by the API operation
+   */
   [[nodiscard]] constexpr auto response_code() const noexcept -> int64_t { return _response_code; }
 
+  /**
+   * @returns the raw HTTP body returned by the API operation
+   */
   [[nodiscard]] constexpr auto body() const noexcept -> std::string const& { return _body; }
 
+  /**
+   * @brief Attempts to parse the body as a structured API error.
+   *
+   * @returns the parsed error, or the JSON exception resulting from parsing failure
+   */
   [[nodiscard]] auto api_error() const noexcept -> std::variant<types::api_error, json::exception>
   {
     try {
@@ -93,11 +119,20 @@ struct failure_reason<failure::request_failed> {
 };
 using request_failed = failure_reason<failure::request_failed>;
 
+/**
+ * @brief A request that succeeded on the remote server, but whose response could not be parsed.
+ *
+ * @details This response normally indicates either a bug in Cppinecone or a divergence in
+ * API/client expectations (e.g., the API has been upgraded but the client has not).
+ */
 template <>
 struct failure_reason<failure::parsing_failed> {
   explicit failure_reason(json::exception const& ex) noexcept : _message(ex.what()) {}
   explicit failure_reason(char const* message) noexcept : _message(message) {}
 
+  /**
+   * @returns the exception message associated with the parsing failure
+   */
   [[nodiscard]] constexpr auto message() const noexcept -> char const* { return _message; }
 
  private:
@@ -105,6 +140,15 @@ struct failure_reason<failure::parsing_failed> {
 };
 using parsing_failed = failure_reason<failure::parsing_failed>;
 
+/**
+ * @brief Models the possibility of failure for all Cppinecone public API operations.
+ *
+ * @details Cppinecone heavily constrains the types of errors that it allows to be propagated to
+ * clients. All operations return a result, allowing the library fine-grained control over failure
+ * modes and error handling. Usage of this class can be modified with client-level policies.
+ *
+ * @tparam T the type held in the event of operation success
+ */
 template <typename T>
 struct [[nodiscard]] result {
   using error_type = std::variant<request_rejected, request_failed, parsing_failed>;
@@ -123,6 +167,9 @@ struct [[nodiscard]] result {
   // NOLINTNEXTLINE
   result(error_type err) noexcept : _value(std::move(err)) {}
 
+  /**
+   * @returns the reason for operation failure (or a sentinel value for successful operations)
+   */
   [[nodiscard]] constexpr auto failure_reason() const noexcept -> failure
   {
     if (_value.index() == 0) {
@@ -140,6 +187,14 @@ struct [[nodiscard]] result {
     }
   }
 
+  /**
+   * @brief Retrieves a string representation of the operation result.
+   *
+   * @details The format of this string is _not_ specified and should not be relied upon
+   * programmatically.
+   *
+   * @returns the string representation of the result
+   */
   [[nodiscard]] auto to_string() const noexcept -> std::string
   {
     if (_value.index() == 0) {
@@ -167,19 +222,26 @@ struct [[nodiscard]] result {
     return oss.str();
   }
 
+  /**
+   * @returns whether the operation succeeded
+   */
   [[nodiscard]] constexpr auto is_successful() const noexcept -> bool
   {
     return _value.index() == 0;
   }
 
+  /**
+   * @returns whether the operation failed
+   */
   [[nodiscard]] constexpr auto is_failed() const noexcept -> bool { return !is_successful(); }
 
-  template <typename U>
-  [[nodiscard]] constexpr auto propagate() noexcept -> result<U>
-  {
-    return {std::move(std::get<error_type>(_value))};
-  }
-
+  /**
+   * @brief Runs a transformation function on a successful result; does nothing on a failed result.
+   *
+   * @tparam U the result type of the transformation function
+   * @param func the transformation function to apply on a successful result
+   * @return the result of the transformation (or the propagated error)
+   */
   template <typename U>
   constexpr auto and_then(std::function<result<U>(T&)> const& func) noexcept -> result<U>
   {
@@ -190,12 +252,28 @@ struct [[nodiscard]] result {
     return func(std::get<T>(_value));
   }
 
+  /**
+   * @brief Can be used only on successful results.
+   */
   [[nodiscard]] constexpr auto operator->() noexcept -> T* { return &std::get<T>(_value); }
+
+  /**
+   * @brief Can be used only on successful results.
+   */
   [[nodiscard]] constexpr auto operator*() noexcept -> T& { return std::get<T>(_value); }
 
+  /**
+   * @returns the raw value contained within the result
+   */
   [[nodiscard]] constexpr auto value() noexcept -> value_type& { return _value; }
 
  private:
+  template <typename U>
+  [[nodiscard]] constexpr auto propagate() noexcept -> result<U>
+  {
+    return {std::move(std::get<error_type>(_value))};
+  }
+
   value_type _value;
 };
 }  // namespace pinecone::util

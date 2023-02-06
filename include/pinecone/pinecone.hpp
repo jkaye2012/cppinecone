@@ -32,9 +32,23 @@ using vec_args = domain::operation_args<t, f>;
 
 /**
  * @brief The Pinecone REST API client.
+ *
+ * @tparam Mode the threading mode for the client
+ *
+ * @details All functions on this class mirror Pinecone API operations directly; as such,
+ * function-level documentation is provided only when Cppinecone functionality somehow diverges
+ * from Pinecone's provided API functionality.
+ * @see TODO: Pinecone documentation link
  */
 template <net::threading_mode Mode>
 struct pinecone_client {
+  /**
+   * @brief Attempts to initialize a new Pinecone API client.
+   *
+   * @param args arguments to initialize the client connection
+   * @returns a Pinecone client instance initialized according to the provided arguments, or an
+   * empty optional if required system dependencies could not be located
+   */
   static auto build(net::connection_args args) -> std::optional<pinecone_client<Mode>>
   {
     net::url_builder url_builder(args.environment());

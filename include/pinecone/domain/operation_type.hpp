@@ -1,18 +1,23 @@
 #pragma once
+/**
+ * @file operation_type.hpp
+ * @brief Operations made available by the Pinecone API.
+ */
 
 #include "pinecone/domain/method.hpp"
 
 namespace pinecone::domain
-{ /**
-   * @brief All operation_types exposed by the Pinecone REST API.
-   *
-   * @details
-   * Operation_Types can be understood within three general categories:
-   *
-   * - Index operation_types
-   * - Collection operation_types
-   * - Vector operation_types
-   */
+{
+/**
+ * @brief All operation types exposed by the Pinecone REST API.
+ *
+ * @details
+ * Operation types can be understood within three general categories:
+ *
+ * - Index operations
+ * - Collection operations
+ * - Vector operations
+ */
 enum class operation_type {
   actions_whoami,
 
@@ -51,6 +56,12 @@ enum class api_type {
   service
 };
 
+/**
+ * @brief Returns the API type of an operation.
+ *
+ * @param op the operation to query
+ * @return the API type for the operation
+ */
 constexpr auto op_api_type(operation_type op) -> api_type
 {
   switch (op) {
@@ -75,6 +86,12 @@ constexpr auto op_api_type(operation_type op) -> api_type
   }
 }
 
+/**
+ * @brief Returns the URL specialization for an operation
+ *
+ * @param op the operation to query
+ * @return the URL suffix for the operation
+ */
 constexpr auto op_url_fragment(operation_type op) -> char const*
 {
   switch (op) {
@@ -108,6 +125,12 @@ constexpr auto op_url_fragment(operation_type op) -> char const*
   }
 }
 
+/**
+ * @brief Returns the HTTP method for an operation.
+ *
+ * @param op the operation to query
+ * @return the HTTP method for the operation
+ */
 constexpr auto op_method(operation_type op) -> method
 {
   switch (op) {

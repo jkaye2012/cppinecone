@@ -1,4 +1,11 @@
 #pragma once
+/**
+ * @file http_client.hpp
+ * @brief A bare-bones HTTP client implementation.
+ * @details Cppinecone uses CURL for all networking functionality.
+ * http_client is a simple wrapper around the native CURL libraries to make things
+ * slightly more ergonomic and idiomatic for C++.
+ */
 
 #include <cassert>
 #include <cstddef>
@@ -6,6 +13,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -27,16 +35,26 @@ static constexpr int64_t kHttpCreated = 201;
 static constexpr int64_t kHttpAccepted = 202;
 
 /**
- * @brief An HTTP client responsible for making requests to a Pinecone
- * instance.
+ * @brief An HTTP client responsible for making requests to a Pinecone instance.
+ * @tparam Mode the threading model for the client
  */
 template <threading_mode Mode>
 struct http_client;
 
 static constexpr auto kContentType = "Content-Type: application/json; charset=utf-8";
 
+/**
+ * @brief A synchronous HTTP client implementation.
+ * @details Instances of this type are _not_ thread-safe.
+ */
 template <>
 struct http_client<threading_mode::sync> {
+  /**
+   * @brief Attempts to construct a synchronous HTTP client via user-specific connection_args.
+   *
+   * @param args connection arguments
+   * @return an owning pointer to an http_client, or nullptr if CURL initialization fails somehow
+   */
   static auto build(connection_args args) noexcept -> std::unique_ptr<http_client>
   {
     auto* curl_handle = curl_easy_init();
@@ -62,11 +80,19 @@ struct http_client<threading_mode::sync> {
   http_client(http_client&&) noexcept = default;
   auto operator=(http_client&&) noexcept -> http_client& = default;
 
-  template <domain::operation_type Op, typename Dep = bool>
-  auto request(domain::operation_args<Op, Dep> op_args) const noexcept
-      -> util::result<typename domain::operation_args<Op, Dep>::parsed_type>
+  /**
+   * @brief Attempts to run a single Pinecone request and parses the server's response.
+   *
+   * @tparam Op the operation_type to run
+   * @tparam Body the expected type of the response body (if a parseable response is expected)
+   * @param op_args the operation-specific arguments
+   * @return the result of the operation
+   */
+  template <domain::operation_type Op, typename Body = std::monostate>
+  auto request(domain::operation_args<Op, Body> op_args) const noexcept
+      -> util::result<typename domain::operation_args<Op, Body>::parsed_type>
   {
-    domain::operation<Op, Dep> operation(std::move(op_args));
+    domain::operation<Op, Body> operation(std::move(op_args));
     _data.clear();
     auto result =
         operation.set_opts(_curl_handle, _headers)
