@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file vector_types.hpp
+ * @brief Native C++ types modeling the results of vector operations
+ */
 
 #include <cstdint>
 #include <optional>

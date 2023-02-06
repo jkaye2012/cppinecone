@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file vector_metadata.hpp
+ * @brief Encoding for Pinecone's vector metadata API
+ */
 
 #include <cstdint>
 #include <sstream>
@@ -16,6 +20,9 @@ using json = nlohmann::json;
 
 namespace pinecone::types
 {
+/**
+ * @brief The binary operators supported by the metadata filtering API.
+ */
 enum class binary_operator {
   unknown,
   eq,
@@ -35,6 +42,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(binary_operator, {{binary_operator::unknown, nullpt
                                                {binary_operator::lt, "$lt"},
                                                {binary_operator::lte, "$lte"}})
 
+/**
+ * @brief The array operators supported by the metadata filtering API.
+ */
 enum class array_operator {
   unknown,
   in,
@@ -46,6 +56,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(array_operator, {{array_operator::unknown, nullptr}
                                               {array_operator::in, "$in"},
                                               {array_operator::nin, "$nin"}})
 
+/**
+ * @brief The combination operators supported by the metadata filtering API.
+ */
 enum class combination_operator {
   unknown,
   and_,
@@ -57,6 +70,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(combination_operator, {{combination_operator::unkno
                                                     {combination_operator::and_, "$and"},
                                                     {combination_operator::or_, "$or"}})
 
+/**
+ * @brief Value types supported by the metadata filtering API.
+ */
 struct metadata_value {
   using value_type = std::variant<bool, int64_t, double, std::string>;
   // NOLINTNEXTLINE
@@ -81,6 +97,15 @@ struct metadata_value {
   value_type _var;
 };
 
+/**
+ * @brief Metadata for a single Pinecone vector.
+ * @details Metadata is essentially a map of key:value pairs where each key is a string and each
+ * value is a metadata_value (essentially a variant over a few supported value types). This metadata
+ * can be used in multiple API operations as a filter to restrict the operation to run on a subset
+ * of vectors within an index. Due to the complexity of this API, Cppinecone encodes metadata
+ * filtering with a special set of operations that make it easier to interact with from C++ code.
+ * @see filters.hpp
+ */
 struct metadata {
   metadata() = default;
   explicit metadata(std::unordered_map<std::string, metadata_value> values) noexcept
@@ -88,6 +113,9 @@ struct metadata {
   {
   }
 
+  /**
+   * @return the raw metadata values
+   */
   [[nodiscard]] auto values() const noexcept
       -> std::unordered_map<std::string, metadata_value> const&
   {
@@ -135,6 +163,10 @@ struct filter_base {
   }
 };
 
+/**
+ * @brief Binary filters are simple predicates; they compare a single metadata value to a provided
+ * operand.
+ */
 struct binary_filter : public filter_base<binary_filter> {
   friend void to_json(nlohmann ::json& nlohmann_json_j, const binary_filter& nlohmann_json_t)
   {
@@ -153,7 +185,12 @@ struct binary_filter : public filter_base<binary_filter> {
   metadata_value _value;
 };
 
-// iter must support .begin() and .end(), and the value type must be convertible to metadata_value
+/**
+ * @brief Array filters test a single metadata value against multiple operands.
+ *
+ * @tparam iter the iterator type, must support .begin() and .end(), and must be implicitly
+ * convertiable to metadata_value
+ */
 template <typename iter>
 struct array_filter : public filter_base<array_filter<iter>> {
   friend void to_json(nlohmann ::json& nlohmann_json_j, const array_filter& nlohmann_json_t)
@@ -190,7 +227,12 @@ auto serialize_expand(json& arr, filter const& f, filters const&... fs) -> void
   serialize_expand(arr, fs...);
 }
 
-// each ts must be one of binary_filter, array_filter, or combination_filter
+/**
+ * @brief Combination filters apply boolean logic to the other filter types.
+ *
+ * @tparam ts the filter types to combine; each entry must be one of binary_filter, array_filter, or
+ * combination_filter
+ */
 template <typename... ts>
 struct combination_filter : public filter_base<combination_filter<ts...>> {
   friend void to_json(nlohmann ::json& nlohmann_json_j, const combination_filter& nlohmann_json_t)
@@ -213,6 +255,9 @@ struct combination_filter : public filter_base<combination_filter<ts...>> {
   std::tuple<ts...> _filters;
 };
 
+/**
+ * @brief No filter applied; always returns true.
+ */
 struct no_filter : public filter_base<no_filter> {
   friend void to_json(nlohmann ::json& nlohmann_json_j, const no_filter& /*nlohmann_json_t*/)
   {

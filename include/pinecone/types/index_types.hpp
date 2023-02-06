@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file index_types.hpp
+ * @brief Native C++ type modeling the results of index operations
+ */
 
 #include <cstdint>
 #include <optional>
