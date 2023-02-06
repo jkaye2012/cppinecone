@@ -7,8 +7,9 @@ FetchContent_MakeAvailable(Catch2)
 
 set(cppinecone_test_files
   "entrypoint.cpp"
-  "test.cpp"
+  "meta_operations_tests.cpp"
 )
 
 add_executable(cppinecone_tests ${cppinecone_test_files})
-target_link_libraries(cppinecone_tests PRIVATE Catch2::Catch2WithMain)
+target_include_directories(cppinecone_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(cppinecone_tests PRIVATE Catch2::Catch2WithMain cppinecone)
