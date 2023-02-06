@@ -2,6 +2,22 @@
 /**
  * @file filters.hpp
  * @brief Filters supported by complex vector API operations
+ *
+ * @details All operations that accept metadata filters accept only a single top-level filter
+ instance when the operation is dispatched; however, because of how these filters compose, it is
+ possible to
+ * supply as many filters to an operation as you wish. For example, to find values with a "key"
+ metadata value greater than 0 and less than 10, we would use the @p and combination filter with the
+ @p gt and @p lt binary filters:
+ *
+ * @code
+ * using namespace f = pinecone::types::filters;
+ * auto gt0 = f::gt("key", 0);
+ * auto lt0 = f::lt("key", 10);
+ * auto filter = f::and_(gt0, lt10);
+ * // now we can use filter with an API operation
+ * @endcode
+ *
  */
 
 #include <string>

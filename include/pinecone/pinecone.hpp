@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file pinecone.hpp
+ * @brief The Pinecone API client (start here!)
+ */
 
 #include <memory>
 #include <optional>
@@ -38,7 +42,19 @@ using vec_args = domain::operation_args<t, f>;
  * @details All functions on this class mirror Pinecone API operations directly; as such,
  * function-level documentation is provided only when Cppinecone functionality somehow diverges
  * from Pinecone's provided API functionality.
- * @see TODO: Pinecone documentation link
+ *
+ * Most API operations that require specifically-formatted inputs follow the Builder pattern to
+ * easily support optional fields in each message. See the documentation for the @p builder
+ * class contained within each custom type for details on how to construct instances of the type.
+ * The values accepted by these builders follow the semantics of the Pinecone API as described
+ * in the documentation linked below.
+ *
+ * All operations that accept a @p filter argument make use of the vector metadata filtering API.
+ * The API supports an arbitrary number of filters via filter combination. See the linked
+ * documentation below for more details.
+ *
+ * @see https://docs.pinecone.io/docs/overview
+ * @see filters.hpp
  */
 template <net::threading_mode Mode>
 struct pinecone_client {
