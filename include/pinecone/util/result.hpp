@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file result.hpp
+ * @brief Models the possibility of failure for Pinecone operations
+ */
 
 #include <sstream>
 #include <string>

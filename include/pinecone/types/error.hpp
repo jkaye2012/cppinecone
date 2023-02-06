@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file error.hpp
+ * @brief Pinecone's custom error format
+ */
 
 #include <cstdint>
 #include <string>

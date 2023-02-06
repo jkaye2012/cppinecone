@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file curl_result.hpp
+ * @brief Wraps CURL results for type and exception safety
+ */
 
 #include <functional>
 #include <string>
@@ -20,6 +24,7 @@ struct [[nodiscard]] curl_result {
 
   /**
    * @brief Constructs a result from a CURL error code.
+   * @details This constructor is intentionally non-explicit to facilitate converting construction.
    */
   // NOLINTNEXTLINE
   constexpr curl_result(CURLcode code) noexcept
@@ -33,6 +38,7 @@ struct [[nodiscard]] curl_result {
 
   /**
    * @brief Constructs a result from a CURL header list.
+   * @details This constructor is intentionally non-explicit to facilitate converting construction.
    */
   // NOLINTNEXTLINE
   constexpr curl_result(curl_slist* list) noexcept

@@ -1,5 +1,6 @@
 #pragma once
 /**
+ * @file method.hpp
  * @brief HTTP method definitions.
  */
 

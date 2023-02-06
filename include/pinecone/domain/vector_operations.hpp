@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file vector_operations.hpp
+ * @brief API operations providing functionality for Pinecone vectors
+ */
 
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"

@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file index_operations.hpp
+ * @brief API operations providing functionality for Pinecone indices
+ */
 
 #include <string>
 #include <vector>

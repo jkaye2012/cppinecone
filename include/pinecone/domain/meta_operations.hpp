@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file meta_operations.hpp
+ * @brief API operations serving Pinecone-specific metadata
+ */
 
 #include "pinecone/domain/operation.hpp"
 #include "pinecone/domain/operation_type.hpp"

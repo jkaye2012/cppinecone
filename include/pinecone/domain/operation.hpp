@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file operation.hpp
+ * @brief Metaprogamming infrastructure for generation of per-operation code
+ */
 
 #include <sstream>
 #include <string>
@@ -14,6 +18,10 @@
 
 namespace pinecone::domain
 {
+/**
+ * @brief All operations require a common subset of information; this information forms the base
+ * arguments.
+ */
 struct arg_base {
   explicit arg_base(std::string url) : _url(std::move(url)) {}
   virtual ~arg_base() = default;
@@ -28,6 +36,10 @@ struct arg_base {
   std::string _url;
 };
 
+/**
+ * @brief List operations are simple and construct themselves using only a URL.
+ * @tparam op the operation to specialize as a list operation
+ */
 template <operation_type op>
 struct list_operation_args : public arg_base {
   explicit list_operation_args(net::url_builder const& url_builder) noexcept
@@ -36,6 +48,14 @@ struct list_operation_args : public arg_base {
   }
 };
 
+/**
+ * @brief Constructs a URL for an operation that represents a unary resource.
+ *
+ * @tparam op the operation
+ * @param url_builder a url_builder instance
+ * @param resource_name the name of the resource that @p op will run on
+ * @return the URL identifying the resource
+ */
 template <operation_type op>
 [[nodiscard]] inline auto build_url(net::url_builder const& url_builder,
                                     std::string_view resource_name) noexcept -> std::string
@@ -49,6 +69,10 @@ template <operation_type op>
   }
 }
 
+/**
+ * @brief Describe operations construct themselves using a unique resource name.
+ * @tparam op the operation to specialize as a describe operation
+ */
 template <operation_type op>
 struct describe_delete_operation_args : public arg_base {
   describe_delete_operation_args(net::url_builder const& url_builder,
@@ -58,6 +82,13 @@ struct describe_delete_operation_args : public arg_base {
   }
 };
 
+/**
+ * @brief Patch operations construct themselves using a unique resource name and an
+ * operation-dependent body payload.
+ *
+ * @tparam op the operation to specialize as a patch operation
+ * @tparam Body the operation-dependent payload type
+ */
 template <operation_type op, typename Body>
 struct patch_operation_args : public arg_base {
   patch_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
@@ -69,48 +100,75 @@ struct patch_operation_args : public arg_base {
     _body = j.dump();
   }
 
+  /**
+   * @return the json-formatted body payload
+   */
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
 
  private:
   std::string _body;
 };
 
+/**
+ * @brief Create operations construct themselves using a unique resource name and an
+ * operation-dependent body payload.
+ *
+ * @tparam op the operation to specialize as a create operation
+ * @tparam Body the operation-dependent payload type
+ */
 template <operation_type op, typename Body>
 struct create_operation_args : public arg_base {
   create_operation_args(net::url_builder const& url_builder, Body body) noexcept
       : arg_base(url_builder.build<op>())
   {
-    // TODO: remove duplication
     json j;
     to_json(j, body);
     _body = j.dump();
   }
 
+  /**
+   * @return the json-formatted body payload
+   */
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
 
  private:
   std::string _body;
 };
 
+/**
+ * @brief Vector operations construct themselves using a unique resource name and an
+ * operation-dependent body payload.
+ *
+ * @tparam op the operation to specialize as a vector operation
+ * @tparam Body the operation-dependent payload type
+ */
 template <operation_type op, typename Body>
 struct vector_operation_args : public arg_base {
   vector_operation_args(net::url_builder const& url_builder, std::string_view resource_name,
                         Body body) noexcept
       : arg_base(build_url<op>(url_builder, resource_name))
   {
-    // TODO: remove duplication
     json j;
     to_json(j, body);
     _body = j.dump();
   }
 
+  /**
+   * @return the json-formatted body payload
+   */
   [[nodiscard]] auto body() noexcept -> char const* { return _body.c_str(); }
 
  private:
   std::string _body;
 };
 
-template <operation_type, typename = std::monostate>
+/**
+ * @brief Operation-specific arguments.
+ *
+ * @tparam operation_type the operation type
+ * @tparam Body when relevant, the expected response type of the operation
+ */
+template <operation_type, typename Body = std::monostate>
 struct operation_args;
 
 static constexpr auto kDelete = "DELETE";
@@ -126,10 +184,23 @@ struct operation {
   {
   }
 
+  /**
+   * @brief The type of the operation.
+   */
   static constexpr auto op_type = Op;
 
+  /**
+   * @return the HTTP method associated with the operation
+   */
   [[nodiscard]] constexpr auto method() const noexcept { return _method; }
 
+  /**
+   * @brief Set CURL options for the operation.
+   *
+   * @param curl the initialized curl object
+   * @param headers headers common to all API operations
+   * @return the result
+   */
   constexpr auto set_opts(CURL* curl, curl_slist* headers) noexcept -> util::curl_result
   {
     curl_easy_reset(curl);
@@ -141,6 +212,7 @@ struct operation {
         });
   }
 
+ private:
   constexpr auto set_method_opts(CURL* curl) noexcept -> util::curl_result
   {
     if constexpr (op_method(op_type) == method::del) {
@@ -160,7 +232,6 @@ struct operation {
     return {};
   }
 
- private:
   operation_args<Op, Dep> _args;
   domain::method _method;
 };
