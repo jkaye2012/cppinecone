@@ -124,6 +124,9 @@ struct pod_configuration {
 struct database_status {
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_status, ready, state)
 
+  [[nodiscard]] auto db_ready() const noexcept -> bool { return ready; }
+  [[nodiscard]] auto db_state() const noexcept -> database_state { return state; }
+
  private:
   bool ready;
   database_state state;
@@ -300,7 +303,7 @@ struct new_index {
       nlohmann_json_j["pods"] = *nlohmann_json_t.pods;
     }
     if (nlohmann_json_t.pod_type) {
-      nlohmann_json_j["podConfig"] = *nlohmann_json_t.pod_type;
+      nlohmann_json_j["pod_type"] = *nlohmann_json_t.pod_type;
     }
     if (nlohmann_json_t.shards) {
       nlohmann_json_j["shards"] = *nlohmann_json_t.shards;
@@ -309,10 +312,10 @@ struct new_index {
       nlohmann_json_j["replicas"] = *nlohmann_json_t.replicas;
     }
     if (nlohmann_json_t.metadata_config) {
-      nlohmann_json_j["metadataConfig"] = *nlohmann_json_t.metadata_config;
+      nlohmann_json_j["metadata_config"] = *nlohmann_json_t.metadata_config;
     }
     if (nlohmann_json_t.source_collection) {
-      nlohmann_json_j["sourceCollection"] = *nlohmann_json_t.source_collection;
+      nlohmann_json_j["source_collection"] = *nlohmann_json_t.source_collection;
     }
   }
 

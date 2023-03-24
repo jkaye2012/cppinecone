@@ -7,6 +7,7 @@ FetchContent_MakeAvailable(Catch2)
 
 set(cppinecone_test_files
   "entrypoint.cpp"
+  "index_operations_tests.cpp"
   "meta_operations_tests.cpp"
 )
 

@@ -158,6 +158,7 @@ struct [[nodiscard]] result {
   using error_type = std::variant<request_rejected, request_failed, parsing_failed>;
   using value_type = std::variant<T, error_type>;
 
+  result() noexcept = default;
   // NOLINTNEXTLINE
   result(T value) noexcept : _value(std::move(value)) {}
   // NOLINTNEXTLINE
