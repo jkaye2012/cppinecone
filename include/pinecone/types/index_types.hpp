@@ -319,6 +319,26 @@ struct new_index {
     }
   }
 
+  [[nodiscard]] auto index_name() const noexcept -> std::string { return name; }
+  [[nodiscard]] auto index_dimension() const noexcept -> uint16_t { return dimension; }
+  [[nodiscard]] auto index_metric() const noexcept -> std::optional<metric_type> { return metric; }
+  [[nodiscard]] auto index_pods() const noexcept -> std::optional<uint16_t> { return pods; }
+  [[nodiscard]] auto index_pod_config() const noexcept -> std::optional<pod_configuration>
+  {
+    return pod_type;
+  }
+  [[nodiscard]] auto index_shards() const noexcept -> std::optional<uint16_t> { return shards; }
+  [[nodiscard]] auto index_replicas() const noexcept -> std::optional<uint16_t> { return replicas; }
+  [[nodiscard]] auto index_metadata_config() const noexcept
+      -> std::optional<std::vector<std::string>>
+  {
+    return metadata_config;
+  }
+  [[nodiscard]] auto index_source_collection() const noexcept -> std::optional<std::string>
+  {
+    return source_collection;
+  }
+
  private:
   std::string name;
   uint16_t dimension{};
