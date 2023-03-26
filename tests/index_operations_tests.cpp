@@ -32,7 +32,7 @@ TEST_CASE("Synchronous client index operations", "[index][synchronous]")
 
   auto list_result = client.list_indexes();
   INFO(list_result.to_string());
-  CHECK(list_result.is_successful());
+  REQUIRE(list_result.is_successful());
   CHECK(std::any_of(list_result->begin(), list_result->end(),
                     [](auto const& ind) { return ind == kTestIndex; }));
 
@@ -44,7 +44,7 @@ TEST_CASE("Synchronous client index operations", "[index][synchronous]")
 
   auto describe_result = client.describe_index(kTestIndex);
   INFO(describe_result.to_string());
-  CHECK(describe_result.is_successful());
+  REQUIRE(describe_result.is_successful());
   CHECK(describe_result->db_detail().db_replicas() == 2);
   CHECK(describe_result->db_detail().db_pod_type().size() == pinecone::types::pod_size::x2);
 }

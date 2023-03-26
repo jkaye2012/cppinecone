@@ -28,6 +28,7 @@ TEST_CASE("Synchronous client collection operations", "[collection][synchronous]
 
   auto list_result = client.list_collections();
   INFO(list_result.to_string());
+  REQUIRE(list_result.is_successful());
   CHECK(std::any_of(list_result->begin(), list_result->end(),
                     [](auto const& col) { return col == kTestCollection; }));
 

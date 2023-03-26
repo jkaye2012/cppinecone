@@ -65,6 +65,9 @@ struct test_index {
     } while (index_result.is_successful());
 
     _index = ensure_index(client, std::move(index));
+    // This is dumb, but occasionally Pinecone 503's if we query too quickly after indices report
+    // they're ready
+    std::this_thread::sleep_for(2s);
   }
 
   ~test_index() noexcept

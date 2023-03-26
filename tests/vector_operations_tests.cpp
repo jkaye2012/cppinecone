@@ -21,7 +21,7 @@ inline void test_query(pinecone::synchronous_client const& client,
   auto query_result =
       client.query(kTestIndex, pinecone::types::query_builder(1, query_vec).build());
   INFO(query_result.to_string());
-  CHECK(query_result.is_successful());
+  REQUIRE(query_result.is_successful());
   CHECK(query_result->query_matches().size() == 1);
   CHECK(query_result->query_matches().front().id() == expected);
 }
@@ -35,7 +35,7 @@ inline void test_md_query(pinecone::synchronous_client const& client,
       pinecone::types::query_builder(pinecone::types::filters::ne("skipme", "true"), 1, query_vec)
           .build());
   INFO(query_result.to_string());
-  CHECK(query_result.is_successful());
+  REQUIRE(query_result.is_successful());
   CHECK(query_result->query_matches().size() == 1);
   CHECK(query_result->query_matches().front().id() == expected);
 }
@@ -59,7 +59,7 @@ TEST_CASE("Synchronous client basic vector operations", "[vector][basic][synchro
 
   auto stats_result = client.describe_index_stats(kTestIndex);
   INFO(stats_result.to_string());
-  CHECK(stats_result.is_successful());
+  REQUIRE(stats_result.is_successful());
   CHECK(stats_result->stat_total_vector_count() == 3);
 
   test_query(client, "1");
