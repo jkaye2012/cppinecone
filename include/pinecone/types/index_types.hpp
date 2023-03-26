@@ -174,6 +174,9 @@ struct database {
   database_detail database;
 };
 
+/**
+ * @brief A snapshot of index contents.
+ */
 struct collection {
   [[nodiscard]] auto col_name() const noexcept -> std::string { return name; }
   [[nodiscard]] auto col_size() const noexcept -> uint64_t { return size; }
@@ -187,6 +190,9 @@ struct collection {
   uint64_t size;
 };
 
+/**
+ * @brief The technical configuration of a single Pinecone index.
+ */
 struct index_configuration {
   index_configuration() = default;
   index_configuration(uint16_t replicas, pod_configuration pod_type)
@@ -204,6 +210,9 @@ struct index_configuration {
   pod_configuration pod_type;
 };
 
+/**
+ * @brief Arguments required to create a new collection.
+ */
 struct new_collection {
   new_collection() = default;
   new_collection(std::string name, std::string source) noexcept
@@ -221,6 +230,9 @@ struct new_collection {
   std::string source;
 };
 
+/**
+ * @brief Arguments required to create a new index.
+ */
 struct new_index {
   struct builder {
     builder(std::string name, uint32_t dimension) noexcept

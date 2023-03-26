@@ -22,6 +22,9 @@ using json = nlohmann::json;
 
 namespace pinecone::types
 {
+/**
+ * @brief Statistics for a Pinecone index.
+ */
 struct index_stats {
   struct namespace_summary {
     [[nodiscard]] auto vector_count() const noexcept -> uint64_t { return vectorCount; }
@@ -57,6 +60,11 @@ struct index_stats {
   uint64_t totalVectorCount;
 };
 
+/**
+ * @brief A vector search.
+ *
+ * @tparam filter the metadata filter to apply to the query
+ */
 template <typename filter>
 struct query {
   struct builder {
@@ -152,31 +160,74 @@ struct query {
   }
 };
 
-template <typename filter = no_filter>
+/**
+ * @brief Construct a query builder given a number of results and a target vector.
+ *
+ * @param top_k the number of result vectors that should be returned
+ * @param vector the target vector to search for
+ * @return a query builder
+ */
 inline auto query_builder(uint64_t top_k, std::vector<double> vector) noexcept
+    -> query<no_filter>::builder
 {
-  return typename query<filter>::builder(top_k, std::move(vector));
+  return {top_k, std::move(vector)};
 }
 
-template <typename filter = no_filter>
+/**
+ * @brief Construct a query builder given a number of results and a target vector.
+ *
+ * @param top_k the number of result vectors that should be returned
+ * @param vector_id the id of the target vector (within the same index) to search for
+ * @return a query builder
+ */
 inline auto query_builder(uint64_t top_k, std::string_view vector_id) noexcept
+    -> query<no_filter>::builder
 {
-  return typename query<filter>::builder(top_k, vector_id);
+  return {top_k, vector_id};
 }
 
+/**
+ * @brief Construct a query builder given a number of results and a target vector while applying a
+ * filter.
+ *
+ * @tparam filter the type of filter to apply to the query; should normally be deduced
+ * @param f the filter to apply
+ * @param top_k the number of result vectors that should be returned
+ * @param vector the the target vector to search for
+ * @return a query builder
+ */
 template <typename filter>
-inline auto query_builder(filter f, uint64_t top_k, std::vector<double> vector) noexcept
+inline auto query_builder(filter f, uint64_t top_k, std::vector<double> vector) noexcept ->
+    typename query<filter>::builder
 {
-  return typename query<filter>::builder(f, top_k, std::move(vector));
+  return {f, top_k, std::move(vector)};
 }
 
+/**
+ * @brief Construct a query builder given a number of results and a target vector while applying a
+ * filter.
+ *
+ * @tparam filter the type of filter to apply to the query; should normally be deduced
+ * @param f the filter to apply
+ * @param top_k the number of result vectors that should be returned
+ * @param vector_id the id of the target vector (within the same index) to search for
+ * @return a query builder
+ */
 template <typename filter>
-inline auto query_builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept
+inline auto query_builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept ->
+    typename query<filter>::builder
 {
-  return typename query<filter>::builder(f, top_k, vector_id);
+  return {f, top_k, vector_id};
 }
 
+/**
+ * @brief The result of a vector search.
+ *
+ */
 struct query_result {
+  /**
+   * @brief A vector with its corresponding search score.
+   */
   struct scored_vector {
     [[nodiscard]] auto id() const noexcept -> std::string const& { return _id; }
 
@@ -232,6 +283,11 @@ struct query_result {
 
 using ids = std::vector<std::string_view>;
 
+/**
+ * @brief Deletes one or more vectors from an index.
+ *
+ * @tparam filter the filter to apply to the deletion
+ */
 template <typename filter = no_filter>
 struct delete_request {
   using delete_mode = std::variant<ids, bool, filter>;
@@ -285,6 +341,9 @@ struct delete_request {
   }
 };
 
+/**
+ * @brief Representation of an individual Pinecone vector.
+ */
 struct vector {
   vector() = default;
   vector(std::string id, std::vector<double> values) noexcept
@@ -330,6 +389,9 @@ struct vector {
   std::optional<metadata> _metadata;
 };
 
+/**
+ * @brief Insert or update vectors in an index.
+ */
 struct upsert_request {
   struct builder {
     explicit builder(std::vector<vector> vectors) noexcept : _vectors(std::move(vectors)) {}
@@ -366,6 +428,9 @@ struct upsert_request {
   }
 };
 
+/**
+ * @brief Update existing vectors in an index.
+ */
 struct update_request {
   struct builder {
     explicit builder(std::string_view id) noexcept : _id(id) {}

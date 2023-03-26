@@ -154,6 +154,11 @@ struct metadata {
   std::unordered_map<std::string, metadata_value> _values;
 };
 
+/**
+ * @brief Common operations shared for all filter types.
+ *
+ * @tparam Derived internal type information
+ */
 template <typename Derived>
 struct filter_base {
   friend void to_json(nlohmann ::json& nlohmann_json_j, const filter_base& nlohmann_json_t)

@@ -6,6 +6,11 @@
 
 namespace pinecone::util
 {
+/**
+ * @brief Basic visitor operations.
+ *
+ * @tparam Ts types that operations can be applied to
+ */
 template <class... Ts>
 struct overloaded : Ts... {
   using Ts::operator()...;
