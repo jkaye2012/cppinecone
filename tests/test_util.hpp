@@ -53,11 +53,18 @@ static inline auto ensure_index(synchronous_client const& client, types::new_ind
   return *index_result;
 }
 
-// TODO: ensure that index is deleted before attempting to create it
 struct test_index {
-  test_index(synchronous_client const& client, types::new_index index) noexcept
-      : _client(client), _index(ensure_index(client, std::move(index)))
+  test_index(synchronous_client const& client, types::new_index index) noexcept : _client(client)
   {
+    using namespace std::chrono_literals;
+    auto _ = _client.delete_index(index.index_name());
+    pinecone::util::result<pinecone::types::database> index_result;
+    do {
+      index_result = client.describe_index(index.index_name());
+      std::this_thread::sleep_for(1s);
+    } while (index_result.is_successful());
+
+    _index = ensure_index(client, std::move(index));
   }
 
   ~test_index() noexcept

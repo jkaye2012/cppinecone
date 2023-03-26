@@ -45,14 +45,6 @@ auto main(int /*argc*/, char** argv) -> int
   std::cout << jc.dump() << std::endl;
   std::cout << configure_result.to_string() << std::endl;
 
-  auto unfiltered_stats = client->describe_index_stats("squad", pf::none());
-  std::cout << unfiltered_stats.to_string() << std::endl;
-  std::cout << "Unfiltered: " << unfiltered_stats->stat_namespaces().at("").vector_count()
-            << std::endl;
-
-  auto filtered_stats = client->describe_index_stats("squad", pf::eq("title", "Nutrition"));
-  std::cout << "Filtered: " << filtered_stats->stat_namespaces().at("").vector_count() << std::endl;
-
   pinecone::types::metadata update_md{{{"Testing", "A thing"}}};
   auto update_req =
       pinecone::types::update_request::builder("11113").with_metadata(std::move(update_md)).build();

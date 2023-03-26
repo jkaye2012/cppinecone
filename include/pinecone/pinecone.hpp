@@ -93,7 +93,6 @@ struct pinecone_client {
     return _http_client->request(args<type::index_create>{_url_builder, std::move(index)});
   }
 
-  // TODO: consider whether directly exposing vector here and below is a good idea
   [[nodiscard]] auto list_indexes() const noexcept -> util::result<std::vector<std::string>>
   {
     return _http_client->request(args<type::index_list>{_url_builder});
@@ -142,22 +141,16 @@ struct pinecone_client {
         args<type::collection_create>(_url_builder, std::move(collection)));
   }
 
-  template <typename filter>
-  [[nodiscard]] auto describe_index_stats(std::string_view name, filter f) const noexcept
-  {
-    return _http_client->request(
-        vec_args<type::vector_describe_index_stats, filter>{_url_builder, name, std::move(f)});
-  }
-
-  template <typename filter>
   [[nodiscard]] auto describe_index_stats(std::string_view name) const noexcept
+      -> util::result<types::index_stats>
   {
-    return _http_client->request(vec_args<type::vector_describe_index_stats, filter>{
+    return _http_client->request(vec_args<type::vector_describe_index_stats, types::no_filter>{
         _url_builder, name, types::filters::none()});
   }
 
   template <typename filter>
   [[nodiscard]] auto query(std::string_view name, types::query<filter> query) const noexcept
+      -> util::result<types::query_result>
   {
     return _http_client->request(
         vec_args<type::vector_query, filter>{_url_builder, name, std::move(query)});
@@ -166,17 +159,20 @@ struct pinecone_client {
   template <typename filter>
   [[nodiscard]] auto delete_vectors(std::string_view name,
                                     types::delete_request<filter> req) const noexcept
+      -> util::result<types::accepted>
   {
     return _http_client->request(
         vec_args<type::vector_delete, filter>{_url_builder, name, std::move(req)});
   }
 
   [[nodiscard]] auto upsert_vectors(std::string_view name, types::upsert_request req) const noexcept
+      -> util::result<types::accepted>
   {
     return _http_client->request(args<type::vector_upsert>{_url_builder, name, std::move(req)});
   }
 
   [[nodiscard]] auto update_vector(std::string_view name, types::update_request req) const noexcept
+      -> util::result<types::accepted>
   {
     return _http_client->request(args<type::vector_update>{_url_builder, name, std::move(req)});
   }
@@ -189,6 +185,14 @@ struct pinecone_client {
                   std::unique_ptr<net::http_client<Mode>> client) noexcept
       : _url_builder(std::move(url_builder)), _http_client(std::move(client))
   {
+  }
+
+  template <typename filter>
+  [[nodiscard]] auto describe_index_stats(std::string_view name, filter f) const noexcept
+      -> util::result<types::index_stats>
+  {
+    return _http_client->request(
+        vec_args<type::vector_describe_index_stats, filter>{_url_builder, name, std::move(f)});
   }
 };
 

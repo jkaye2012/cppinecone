@@ -60,16 +60,16 @@ struct index_stats {
 template <typename filter>
 struct query {
   struct builder {
-    builder(uint64_t top_k, double vector) noexcept
-        : _top_k(top_k), _query(vector), _filter(filters::none())
+    builder(uint64_t top_k, std::vector<double> vector) noexcept
+        : _top_k(top_k), _query(std::move(vector)), _filter(filters::none())
     {
     }
     builder(uint64_t top_k, std::string_view vector_id) noexcept
         : _top_k(top_k), _query(vector_id), _filter(filters::none())
     {
     }
-    builder(filter f, uint64_t top_k, double vector) noexcept
-        : _top_k(top_k), _query(vector), _filter(std::move(f))
+    builder(filter f, uint64_t top_k, std::vector<double> vector) noexcept
+        : _top_k(top_k), _query(std::move(vector)), _filter(std::move(f))
     {
     }
     builder(filter f, uint64_t top_k, std::string_view vector_id) noexcept
@@ -102,7 +102,7 @@ struct query {
 
    private:
     uint64_t _top_k;
-    std::variant<double, std::string_view> _query;
+    std::variant<std::vector<double>, std::string_view> _query;
     filter _filter;
     std::optional<std::string_view> _namespace;
     std::optional<bool> _include_values;
@@ -114,8 +114,8 @@ struct query {
     to_json(nlohmann_json_j["filter"], nlohmann_json_t._filter);
     nlohmann_json_j["topK"] = nlohmann_json_t._top_k;
 
-    if (std::holds_alternative<double>(nlohmann_json_t._query)) {
-      nlohmann_json_j["vector"] = std::get<double>(nlohmann_json_t._query);
+    if (std::holds_alternative<std::vector<double>>(nlohmann_json_t._query)) {
+      nlohmann_json_j["vector"] = std::get<std::vector<double>>(nlohmann_json_t._query);
     } else if (std::holds_alternative<std::string_view>(nlohmann_json_t._query)) {
       nlohmann_json_j["id"] = std::get<std::string_view>(nlohmann_json_t._query);
     }
@@ -133,7 +133,7 @@ struct query {
 
  private:
   uint64_t _top_k;
-  std::variant<double, std::string_view> _query;
+  std::variant<std::vector<double>, std::string_view> _query;
   std::optional<std::string_view> _namespace;
   filter _filter;
   std::optional<bool> _include_values;
@@ -141,9 +141,9 @@ struct query {
 
   query(std::optional<std::string_view> ns, uint64_t top_k, filter f,
         std::optional<bool> include_values, std::optional<bool> include_metadata,
-        std::variant<double, std::string_view> query) noexcept
+        std::variant<std::vector<double>, std::string_view> query) noexcept
       : _top_k(top_k),
-        _query(query),
+        _query(std::move(query)),
         _namespace(ns),
         _filter(std::move(f)),
         _include_values(include_values),
@@ -153,9 +153,9 @@ struct query {
 };
 
 template <typename filter = no_filter>
-inline auto query_builder(uint64_t top_k, double vector) noexcept
+inline auto query_builder(uint64_t top_k, std::vector<double> vector) noexcept
 {
-  return typename query<filter>::builder(top_k, vector);
+  return typename query<filter>::builder(top_k, std::move(vector));
 }
 
 template <typename filter = no_filter>
@@ -165,9 +165,9 @@ inline auto query_builder(uint64_t top_k, std::string_view vector_id) noexcept
 }
 
 template <typename filter>
-inline auto query_builder(filter f, uint64_t top_k, double vector) noexcept
+inline auto query_builder(filter f, uint64_t top_k, std::vector<double> vector) noexcept
 {
-  return typename query<filter>::builder(f, top_k, vector);
+  return typename query<filter>::builder(f, top_k, std::move(vector));
 }
 
 template <typename filter>
@@ -292,7 +292,7 @@ struct vector {
   {
   }
 
-  vector(std::string id, std::vector<double> values, std::optional<metadata> md) noexcept
+  vector(std::string id, std::vector<double> values, metadata md) noexcept
       : _id(std::move(id)), _values(std::move(values)), _metadata(std::move(md))
   {
   }

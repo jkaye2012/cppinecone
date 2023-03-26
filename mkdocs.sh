@@ -7,6 +7,12 @@ cd "$SCRIPTPATH" || exit 255
 
 SHOULD_DOXYGEN=1
 
+function watch_doxygen() {
+    while inotifywait -r -e modify include; do
+        doxygen Doxyfile
+    done
+}
+
 while (("$#")); do
     case "$1" in
     -h | --help)
@@ -25,5 +31,6 @@ done
 
 if [ $SHOULD_DOXYGEN -eq 1 ]; then
     doxygen Doxyfile
+    watch_doxygen &
 fi
 mkdocs serve -a 0.0.0.0:8000

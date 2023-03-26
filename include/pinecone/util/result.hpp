@@ -210,18 +210,19 @@ struct [[nodiscard]] result {
     auto const& err = std::get<error_type>(_value);
     switch (err.index()) {
       case 0:
-        oss << "Request rejected: "
+        oss << "Request rejected. CURL error code: "
             << curl_result::to_string(std::get<request_rejected>(err).curl_error());
         break;
       case 1:
-        oss << "Request failed: " << std::get<request_failed>(err).response_code() << " "
+        oss << "Request failed. HTTP response code: "
+            << std::get<request_failed>(err).response_code() << " "
             << std::get<request_failed>(err).body();
         break;
       case 2:
-        oss << "Parsing failed: " << std::get<parsing_failed>(err).message();
+        oss << "Parsing failed. Exception message: " << std::get<parsing_failed>(err).message();
         break;
       default:
-        return "unknown";
+        return "Unknown. This is a bug, please report it!";
     }
 
     return oss.str();

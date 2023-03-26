@@ -35,7 +35,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(database_state, {{database_state::unknown, nullptr}
                                               {database_state::scaling_up, "scaling_up"},
                                               {database_state::scaling_down, "scaling_down"},
                                               {database_state::terminating, "terminating"},
-                                              {database_state::ready, "ready"}})
+                                              {database_state::ready, "ready"}});
 
 /**
  * @brief Pod types for individual databases.
@@ -51,7 +51,7 @@ enum class pod_type {
 NLOHMANN_JSON_SERIALIZE_ENUM(pod_type, {{pod_type::unknown, nullptr},
                                         {pod_type::s1, "s1"},
                                         {pod_type::p1, "p1"},
-                                        {pod_type::p2, "p2"}})
+                                        {pod_type::p2, "p2"}});
 
 /**
  * @brief Pod sizes for individual databases.
@@ -69,7 +69,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(pod_size, {{pod_size::unknown, nullptr},
                                         {pod_size::x1, "x1"},
                                         {pod_size::x2, "x2"},
                                         {pod_size::x4, "x4"},
-                                        {pod_size::x8, "x8"}})
+                                        {pod_size::x8, "x8"}});
 
 /**
  * @brief Metric types for individual databases.
@@ -85,7 +85,7 @@ enum class metric_type {
 NLOHMANN_JSON_SERIALIZE_ENUM(metric_type, {{metric_type::unknown, nullptr},
                                            {metric_type::euclidean, "euclidean"},
                                            {metric_type::cosine, "cosine"},
-                                           {metric_type::dotproduct, "dotproduct"}})
+                                           {metric_type::dotproduct, "dotproduct"}});
 
 /**
  * @brief Pod configuration for an individual index.
@@ -122,7 +122,7 @@ struct pod_configuration {
  * @brief The status of an individual database.
  */
 struct database_status {
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_status, ready, state)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_status, ready, state);
 
   [[nodiscard]] auto db_ready() const noexcept -> bool { return ready; }
   [[nodiscard]] auto db_state() const noexcept -> database_state { return state; }
@@ -133,7 +133,7 @@ struct database_status {
 };
 
 /**
- * @brief The complete description of an individual database.
+ * @brief The details of an individual database.
  */
 struct database_detail {
   [[nodiscard]] constexpr auto db_name() const noexcept -> std::string const& { return name; }
@@ -148,7 +148,7 @@ struct database_detail {
   [[nodiscard]] constexpr auto db_shards() const noexcept -> uint16_t { return shards; }
 
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(database_detail, name, dimension, metric, pod_type, pods, replicas,
-                                 shards)
+                                 shards);
 
  private:
   std::string name;
@@ -160,6 +160,9 @@ struct database_detail {
   uint16_t shards;
 };
 
+/**
+ * @brief The complete description of a Pinecone vector index.
+ */
 struct database {
   [[nodiscard]] auto db_status() const noexcept -> database_status { return status; }
   [[nodiscard]] auto db_detail() const noexcept -> database_detail { return database; }
@@ -176,7 +179,7 @@ struct collection {
   [[nodiscard]] auto col_size() const noexcept -> uint64_t { return size; }
   [[nodiscard]] auto col_status() const noexcept -> std::string { return status; }
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(collection, name, status, size)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(collection, name, status, size);
 
  private:
   std::string name;
@@ -194,7 +197,7 @@ struct index_configuration {
   [[nodiscard]] auto index_replicas() const noexcept -> uint16_t { return replicas; }
   [[nodiscard]] auto index_pod_config() const noexcept -> pod_configuration { return pod_type; }
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(index_configuration, replicas, pod_type)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(index_configuration, replicas, pod_type);
 
  private:
   uint16_t replicas;
@@ -211,7 +214,7 @@ struct new_collection {
   [[nodiscard]] auto col_name() const noexcept -> std::string const& { return name; }
   [[nodiscard]] auto col_source() const noexcept -> std::string const& { return source; }
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(new_collection, name, source)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(new_collection, name, source);
 
  private:
   std::string name;

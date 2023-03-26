@@ -5,7 +5,7 @@
 #include "pinecone/pinecone.hpp"
 #include "test_util.hpp"
 
-TEST_CASE("Synchronous client API metadata operations", "[metadata][synchronous]")
+TEST_CASE("Synchronous client API metadata operations", "[meta][synchronous]")
 {
   auto client = pinecone::tests::build_sync_client();
   auto metadata = client.get_api_metdata();
