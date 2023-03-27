@@ -26,21 +26,21 @@ client is supported (though there are plans for an asynchronous option in the fu
 ```cpp
 #include <pinecone/pinecone.hpp>
 
-auto client = pinecone::synchronous_client::build({"us-west1-gcp", "api_key_goes_here"});
+auto client = std::move(std::get<pinecone::synchronous_client>(pinecone::synchronous_client::build({"us-west1-gcp", "api_key_goes_here"})));
 ```
 
 Note that it is technically possible for client creation to fail, so the `build` function
 returns Cppinecone's `result` type. While this is true, client construction failure is possible
-only due to a system configuration problem (namely, a curl version mismatch), so this possibility
+only due to a system configuration problem (usually, a curl version mismatch), so this possibility
 can be safely ignored in many situations. If you're in control of the systems that your code will
 be run on, you can safely use the `result` directly without unwrapping it.
 
 ## Run a collection operation
 
-Let's use our constructed client to find the collections available to us:
+Let's use the client to find the collections available to us:
 
 ```cpp
-auto collections = client->list_collections();
+auto collections = client.list_collections();
 if(collections) {
   std::cout << "Number of collections: " << collections->names().size() << std::endl; // Requires <iostream>
 } else {
@@ -48,15 +48,15 @@ if(collections) {
 }
 ```
 
-Most Cppinecone operations are just this simple: create a client once somewhere within your application, then
+Most Cppinecone operations are as simple as this: create a client once somewhere within your application, then
 run all future operations using the single client instance. Multiple client instances are required only
-when access to multiple environments or multiple API keys are necessary.
+for concurrent requests, or when access to multiple environments/API keys are necessary.
 
 The synchronous client is **not** thread-safe; if multiple threads require Pinecone access, either create a client per
-thread or ensure that the client is protected by a [mutex](). Once the asynchronous client is released, this restriction
-will be lifted.
+thread or ensure that the client is protected by a [mutex](https://en.cppreference.com/w/cpp/thread/mutex).
+Once the asynchronous client is released, this restriction will be lifted.
 
-Same as the client construction, all API operations by default return a [result](). `result` models the possibility
+Same as the client construction, all API operations by default return a [result](/doxygen/html/structpinecone_1_1util_1_1result.html). `result` models the possibility
 of failure; as all API operations require network access, they are all fallible. `result` is implicitly
 `nodiscard`, meaning that your compiler will warn you if you accidentally forget to ensure that an operation
 was successful.
@@ -67,15 +67,13 @@ Note that even though Cppinecone itself does not throw exceptions by default, it
 If you'd prefer exceptions to the `result` construction, please see the [API customization](./customization.md)
 documentation for the other available failure handling policies.
 
-TODO: link to reference docs above
-
 ## Run a vector operation
 
 Vector operations are very similar to collection operations. All vector operations require the index name to be
 provided:
 
 ```cpp
-auto stats = client->describe_index_stats("squad");
+auto stats = client.describe_index_stats("squad");
 if(stats) {
   std::cout << "Number of namespaces: " << stats->namespaces().size() << std::endl;
 } else {
@@ -88,9 +86,7 @@ if(stats) {
 This is all you need to know to use Cppinecone! For more information about the available operations and other
 in-depth details, check out the rest of the documentation:
 
-TODO: links required
-
-* [API reference]()
+* [API reference](./api_reference.md)
 * [Metadata query API](./metadata_query_api.md)
 * [API customization](./customization.md)
 
@@ -101,6 +97,7 @@ This snippet can be compiled and run directly.
 ```cpp
 #include <iostream>
 #include <string>
+#include <variant>
 
 #include <pinecone/pinecone.hpp>
 
@@ -110,20 +107,21 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  auto client = pinecone::synchronous_client::build({argv[1], argv[2]});
-  if(!client) {
-    std::cerr << "Failed to create client" << std::endl;
+  auto client_build = pinecone::synchronous_client::build({argv[1], argv[2]});
+  if(!std::holds_alternative<pinecone::synchronous_client>(client_build)) {
+    std::cerr << "Failed to create client: " << std::get<std::string>(client_build) << std::endl;
     return 2;
   }
+  auto client = std::move(std::get<pinecone::synchronous_client>(client_build));
 
-  auto collections = client->list_collections();
+  auto collections = client.list_collections();
   if(collections) {
     std::cout << "Number of collections: " << collections->names().size() << std::endl;
   } else {
     std::cerr << "Failed to list collections: " << collections.to_string() << std::endl;
   }
 
-  auto stats = client->describe_index_stats("squad");
+  auto stats = client.describe_index_stats("squad");
   if(stats) {
     std::cout << "Number of namespaces: " << stats->namespaces().size() << std::endl;
   } else {

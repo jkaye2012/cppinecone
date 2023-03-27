@@ -16,7 +16,6 @@ plugins:
 
 nav:
   - index.md
-  - introduction.md
   - quickstart.md
   - installation.md
   - metadata_query_api.md

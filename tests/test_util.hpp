@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <variant>
 
 #include "catch2/catch_message.hpp"
 #include "catch2/catch_test_macros.hpp"
@@ -20,8 +21,8 @@ static inline auto build_sync_client() -> synchronous_client
   auto const* api_key = std::getenv("PINECONE_TEST_API_KEY");
   assert(api_key != nullptr);
   auto client = synchronous_client::build({"us-west1-gcp", api_key});
-  assert(client);
-  return std::move(*client);
+  assert(client.index() == 0);
+  return std::move(std::get<synchronous_client>(client));
 }
 
 static constexpr size_t kDefaultMaxAttempts = 300;

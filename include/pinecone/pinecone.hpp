@@ -6,8 +6,11 @@
 
 #include <memory>
 #include <optional>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <variant>
 #include <vector>
 
 #include "pinecone/domain/index_operations.hpp"
@@ -63,9 +66,9 @@ struct pinecone_client {
    *
    * @param args arguments to initialize the client connection
    * @returns a Pinecone client instance initialized according to the provided arguments, or an
-   * empty optional if required system dependencies could not be located
+   * error message if client construction fails
    */
-  static auto build(net::connection_args args) -> std::optional<pinecone_client<Mode>>
+  static auto build(net::connection_args args) -> std::variant<pinecone_client<Mode>, std::string>
   {
     net::url_builder url_builder(args.environment());
     auto client = net::http_client<Mode>::build(std::move(args));
@@ -73,13 +76,16 @@ struct pinecone_client {
       auto api_metadata = client->request(
           domain::operation_args<domain::operation_type::actions_whoami>(url_builder));
       if (api_metadata.is_failed()) {
-        return std::nullopt;
+        std::ostringstream err;
+        err << "Failed to construct Pinecone client due to API metadata retrieval failure: "
+            << api_metadata.to_string() << std::endl;
+        return {err.str()};
       }
       url_builder.set_metadata(std::move(*api_metadata));
       return pinecone_client(std::move(url_builder), std::move(client));
     }
 
-    return std::nullopt;
+    return {"Failed to construct HTTP client; CURL seems to be somehow misconfigured"};
   }
 
   [[nodiscard]] auto get_api_metdata() const noexcept -> util::result<types::api_metadata>
