@@ -48,7 +48,7 @@ technically does provide other mechanisms to express these filters, the grammar 
 enough to encode any filter expression supported by Pinecone while also maintaining a level of simplicity that makes the
 API much easier to work with than it would be otherwise.
 
-From the grammar, we can see that the necessary rules are simpler than they appear. The API supports only three types of
+From the grammar, it's apparent that the necessary rules are simpler than they appear. The API supports only three types of
 operations:
 
 1. Binary predicates: `eq`, `ne`, `gt`, `gte`, `lt`, and `lte`
@@ -56,7 +56,7 @@ operations:
 3. Combination predicates: `and` and `or`
 
 Binary and N-ary predicates can be thought of as atoms, meaning that they cannot be decomposed into smaller operations,
-while Combination predicates are instead productions, meaning that they are always composed of constituent atoms. We can
+while Combination predicates are instead productions, meaning that they are always composed of two other predicates. We can
 therefore describe metadata filters using [prefix notation](https://en.wikipedia.org/wiki/Polish_notation) so that
 operator precedence is handled automatically by filter construction.
 
@@ -64,3 +64,11 @@ This insight is the core of Cppinecone's metadata filtering API. Filters are con
 root where all leaves form atomic operations. A depth-first traversal of the tree thus automatically constructs the
 prefix notation. This construction also allows the API to easily leverage lazy evaluation, meaning that each filter
 constructed by a user requires only a single allocation step.
+
+## Example
+
+We demonstrate application of both simple and compound predicate filters. This example should be able to be compiled and
+run assuming that Cppinecone has been [installed](./installation.md).
+
+```c++
+```

@@ -31,7 +31,7 @@ if [ "$1" == "--cmake" ]; then
 fi
 
 if [ $SHOULD_CMAKE == 1 ]; then
-    cmake -B "$BUILD_DIR" -DCMAKE_EXPORT_COMPILE_COMMANDS=on -GNinja .
+    cmake -B "$BUILD_DIR" -DCMAKE_EXPORT_COMPILE_COMMANDS=on -DCPPINECONE_BUILD_TESTS=on -GNinja .
 fi
 
 if [ "$1" == "--no-ninja" ]; then

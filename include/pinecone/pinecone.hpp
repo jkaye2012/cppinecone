@@ -61,6 +61,7 @@ using vec_args = domain::operation_args<t, f>;
  */
 template <net::threading_mode Mode>
 struct pinecone_client {
+  pinecone_client() = default;
   /**
    * @brief Attempts to initialize a new Pinecone API client.
    *

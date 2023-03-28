@@ -18,6 +18,7 @@ namespace pinecone::net
  * @brief Constructs Pinecone API URLs.
  */
 struct url_builder {
+  url_builder() = default;
   /**
    * @brief Construct a new url builder object
    *

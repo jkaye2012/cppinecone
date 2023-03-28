@@ -30,7 +30,7 @@ struct arg_base {
   auto operator=(arg_base const&) -> arg_base& = default;
   auto operator=(arg_base&&) noexcept -> arg_base& = default;
 
-  [[nodiscard]] constexpr auto url() const noexcept -> char const* { return _url.c_str(); }
+  [[nodiscard]] auto url() const noexcept -> char const* { return _url.c_str(); }
 
  private:
   std::string _url;
