@@ -5,8 +5,6 @@
 #include <iostream>
 
 #include <pinecone/pinecone.hpp>
-#include <pinecone/types/filters.hpp>
-#include <pinecone/types/vector_types.hpp>
 
 namespace examples
 {

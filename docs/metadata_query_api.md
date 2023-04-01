@@ -78,8 +78,6 @@ access to an index named `squad` created from the `SQuAD` public collection.
 #include <variant>
 
 #include <pinecone/pinecone.hpp>
-#include <pinecone/types/filters.hpp>
-#include <pinecone/types/vector_types.hpp>
 
 static inline void run_metadata_example(pinecone::synchronous_client const& client) noexcept
 {
