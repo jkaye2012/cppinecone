@@ -87,7 +87,7 @@ TEST_CASE("Synchronous client metadata vector operations", "[vector][metadata][s
       {"1", {-1, -1, -1}},
       {"2", {1, 1, 1}},
       {"3", {.5, .5, .5}},
-      {"4", {0, 0, 0}, pinecone::types::metadata({{"skipme", "true"}})},
+      {"4", {0, 0, 0}, pinecone::types::metadata({{"skipme", std::string("true")}})},
   };
   auto upsert_result = client.upsert_vectors(
       kTestMdIndex, pinecone::types::upsert_request::builder(std::move(vecs)).build());
