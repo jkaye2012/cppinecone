@@ -68,7 +68,41 @@ constructed by a user requires only a single allocation step.
 ## Example
 
 We demonstrate application of both simple and compound predicate filters. This example should be able to be compiled and
-run assuming that Cppinecone has been [installed](./installation.md).
+run assuming that Cppinecone has been [installed](./installation.md). The example assumes that the provided API key has
+access to an index named `squad` created from the `SQuAD` public collection.
 
 ```c++
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+#include <variant>
+
+#include <pinecone/pinecone.hpp>
+#include <pinecone/types/filters.hpp>
+#include <pinecone/types/vector_types.hpp>
+
+static inline void run_metadata_example(pinecone::synchronous_client const& client) noexcept
+{
+  auto comic_filter = pinecone::types::filters::eq("title", "Marvel_Comics");
+  auto result =
+      client.query("squad", pinecone::types::query_builder(comic_filter, 1000, "9833").build());
+  assert(result.is_successful());
+  std::cout << "Marvel comic results: " << result->query_matches().size() << std::endl;
+
+  auto ps_filter = pinecone::types::filters::eq("title", "PlayStation_3");
+  auto combined_filter = pinecone::types::filters::or_(comic_filter, ps_filter);
+  auto combined_result =
+      client.query("squad", pinecone::types::query_builder(combined_filter, 1000, "9833").build());
+  assert(combined_result.is_successful());
+  std::cout << "Marvel comic or playstation results: " << combined_result->query_matches().size()
+            << std::endl;
+}
+
+int main(int argc, char** argv)
+{
+  assert(argc == 3);
+  auto client = std::get<0>(pinecone::synchronous_client::build({argv[1], argv[2]}));
+  run_metadata_example(client);
+  return 0;
+}
 ```
