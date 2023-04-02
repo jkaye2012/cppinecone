@@ -2,6 +2,9 @@
 /**
  * @file pinecone.hpp
  * @brief The Pinecone API client (start here!)
+ * @example metadata_filtering.hpp
+ * @example main.cpp
+ * @example CMakeLists.txt
  */
 
 #include <memory>
