@@ -1,31 +1,36 @@
 #!/bin/bash
-set -eo pipefail
+
+# TODO: set -eo pipefail
 
 SCRIPTPATH="$(dirname "$0")"
 cd "$SCRIPTPATH" || exit 255
 
-SHOULD_RETAG=0
+SHOULD_DOXYGEN=1
+
+function watch_doxygen() {
+    while inotifywait -r -e modify include; do
+        doxygen Doxyfile
+    done
+}
 
 while (("$#")); do
     case "$1" in
     -h | --help)
         echo "Usage: $0 [options]"
         echo "Options:"
-        echo "  -h, --help      Show this help message and exit."
-        echo "  -r, --retag     Rebuild and tag the Docker image locally."
-        exit 0
+        echo "  -h, --help              Show this help message and exit."
+        echo "  -sd, --skip-doxygen     Do not generate Doxygen documentation."
         ;;
-    -r | --retag)
-        SHOULD_RETAG=1
+    -sd | --skip-doxygen)
+        SHOULD_DOXYGEN=0
         ;;
     *) break ;;
     esac
     shift
 done
 
-if [ $SHOULD_RETAG -eq 1 ]; then
-    docker build -t cppinecone-build .
+if [ $SHOULD_DOXYGEN -eq 1 ]; then
+    doxygen Doxyfile
+    watch_doxygen &
 fi
-
-# shellcheck disable=SC2068
-docker run --mount type=bind,source="$(pwd)",target=/app -p 8000:8000 -it cppinecone-build /app/mkdocs.sh $@
+mkdocs serve -a 0.0.0.0:8000

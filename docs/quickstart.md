@@ -7,21 +7,17 @@ There are only two requirements to interact with the Pinecone API:
 * You must have access to a Pinecone API key with appropriate permissions
 
 This information is required by Pinecone itself - Cppinecone doesn't carry any of its
-own requirements.
+own requirements at run time.
 
 ## Download and install
 
-Cppinecone must be integrated into your application before it can be used. There are multiple
-methods available; for a full listing, please see the [installation documentation](./installation.md).
-
-The simplest installation method is Cmake's [FetchContent]():
-
-TODO: broken links and complete this section
+Cppinecone must be integrated into your application before it can be used.
+Please see the [installation documentation](./installation.md) for more details.
 
 ## Create a client
 
-All API access is performed through a `pinecone_client` instance. Currently, only a synchronous
-client is supported (though there are plans for an asynchronous option in the future).
+All API access is performed through a `pinecone_client` instance. Currently only a synchronous
+client is supported; there are plans for an asynchronous option in the future.
 
 ```cpp
 #include <pinecone/pinecone.hpp>
@@ -30,10 +26,10 @@ auto client = std::move(std::get<pinecone::synchronous_client>(pinecone::synchro
 ```
 
 Note that it is technically possible for client creation to fail, so the `build` function
-returns Cppinecone's `result` type. While this is true, client construction failure is possible
-only due to a system configuration problem (usually, a curl version mismatch), so this possibility
+returns a [variant](https://en.cppreference.com/w/cpp/utility/variant). Client construction failure is possible
+only due to a system configuration problem (usually, a CURL version mismatch), so this possibility
 can be safely ignored in many situations. If you're in control of the systems that your code will
-be run on, you can safely use the `result` directly without unwrapping it.
+be run on, you can safely extract the constructed client from the variant without further checks.
 
 ## Run a collection operation
 
@@ -56,7 +52,7 @@ The synchronous client is **not** thread-safe; if multiple threads require Pinec
 thread or ensure that the client is protected by a [mutex](https://en.cppreference.com/w/cpp/thread/mutex).
 Once the asynchronous client is released, this restriction will be lifted.
 
-Same as the client construction, all API operations by default return a [result](/doxygen/html/structpinecone_1_1util_1_1result.html). `result` models the possibility
+All API operations by default return a [result](/doxygen/html/structpinecone_1_1util_1_1result.html). `result` models the possibility
 of failure; as all API operations require network access, they are all fallible. `result` is implicitly
 `nodiscard`, meaning that your compiler will warn you if you accidentally forget to ensure that an operation
 was successful.

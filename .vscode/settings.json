@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "noexcept",
-        "serde"
+        "serde",
+        "spdlog"
     ]
 }

@@ -27,6 +27,7 @@ nav:
   - installation.md
   - metadata_query_api.md
   - customization.md
-  - build.md
-  - architecture.md
   - api_reference.md
+  - Development:
+      - development/development_environment.md
+      - development/architecture.md
