@@ -1,6 +1,7 @@
 .cache/
 build/
 deps/
-lib/
-doxygen/
 docker-build/
+doxygen/
+lib/
+site/

@@ -8,14 +8,19 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs:
+      using: 'docker'
+      image: 'Dockerfile'
     steps:
     - uses: actions/checkout@v2
     - name: Build and deploy GitHub Pages
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ./run_docs.sh
+        ./run_docs.sh --build
+        cd site
+        git init --bare
+        git remote add origin https://github.com/jkaye2012/cppinecone
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
         git add .
