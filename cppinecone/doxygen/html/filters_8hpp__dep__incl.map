@@ -1,0 +1,6 @@
+<map id="include/pinecone/types/filters.hpp" name="include/pinecone/types/filters.hpp">
+<area shape="rect" id="node1" title="Filters supported by complex vector API operations." alt="" coords="41,5,213,47"/>
+<area shape="rect" id="node2" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="5,273,228,300"/>
+<area shape="rect" id="node3" href="$vector__types_8hpp.html" title="Native C++ types modeling the results of vector operations." alt="" coords="104,95,276,136"/>
+<area shape="rect" id="node4" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="155,184,340,225"/>
+</map>

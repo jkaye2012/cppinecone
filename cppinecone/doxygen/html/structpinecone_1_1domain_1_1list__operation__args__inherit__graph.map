@@ -1,0 +1,4 @@
+<map id="pinecone::domain::list_operation_args&lt; op &gt;" name="pinecone::domain::list_operation_args&lt; op &gt;">
+<area shape="rect" id="node1" title="List operations are simple and construct themselves using only a URL." alt="" coords="22,80,194,121"/>
+<area shape="rect" id="node2" href="$structpinecone_1_1domain_1_1arg__base.html" title="All operations require a common subset of information; this information forms the base arguments." alt="" coords="5,5,211,32"/>
+</map>

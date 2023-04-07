@@ -1,0 +1,6 @@
+<map id="pinecone::domain::operation_args&lt; operation_type::collection_list &gt;" name="pinecone::domain::operation_args&lt; operation_type::collection_list &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="523,50,805,91"/>
+<area shape="rect" id="node2" href="$structpinecone_1_1domain_1_1list__operation__args.html" title=" " alt="" coords="265,5,468,61"/>
+<area shape="rect" id="node3" href="$structpinecone_1_1domain_1_1arg__base.html" title="All operations require a common subset of information; this information forms the base arguments." alt="" coords="5,20,211,47"/>
+<area shape="rect" id="node4" href="$structpinecone_1_1types_1_1parser.html" title=" " alt="" coords="259,86,475,127"/>
+</map>

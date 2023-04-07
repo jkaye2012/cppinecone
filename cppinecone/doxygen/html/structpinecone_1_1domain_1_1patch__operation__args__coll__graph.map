@@ -1,0 +1,4 @@
+<map id="pinecone::domain::patch_operation_args&lt; op, Body &gt;" name="pinecone::domain::patch_operation_args&lt; op, Body &gt;">
+<area shape="rect" id="node1" title="Patch operations construct themselves using a unique resource name and an operation&#45;dependent body pa..." alt="" coords="5,80,219,121"/>
+<area shape="rect" id="node2" href="$structpinecone_1_1domain_1_1arg__base.html" title="All operations require a common subset of information; this information forms the base arguments." alt="" coords="9,5,215,32"/>
+</map>

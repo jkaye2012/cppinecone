@@ -558,7 +558,7 @@ for concurrent requests, or when access to multiple environments/API keys are ne
 <p>The synchronous client is <strong>not</strong> thread-safe; if multiple threads require Pinecone access, either create a client per
 thread or ensure that the client is protected by a <a href="https://en.cppreference.com/w/cpp/thread/mutex">mutex</a>.
 Once the asynchronous client is released, this restriction will be lifted.</p>
-<p>All API operations by default return a <a href="/doxygen/html/structpinecone_1_1util_1_1result.html">result</a>. <code>result</code> models the possibility
+<p>All API operations by default return a <a href="/cppinecone/doxygen/html/structpinecone_1_1util_1_1result.html">result</a>. <code>result</code> models the possibility
 of failure; as all API operations require network access, they are all fallible. <code>result</code> is implicitly
 <code>nodiscard</code>, meaning that your compiler will warn you if you accidentally forget to ensure that an operation
 was successful.</p>

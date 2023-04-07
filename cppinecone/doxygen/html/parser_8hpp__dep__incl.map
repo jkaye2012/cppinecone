@@ -1,0 +1,7 @@
+<map id="include/pinecone/types/parser.hpp" name="include/pinecone/types/parser.hpp">
+<area shape="rect" id="node1" title="Parses HTTP responses to domain types." alt="" coords="221,5,393,47"/>
+<area shape="rect" id="node2" href="$index__operations_8hpp.html" title="API operations providing functionality for Pinecone indices." alt="" coords="5,95,191,136"/>
+<area shape="rect" id="node4" href="$meta__operations_8hpp.html" title="API operations serving Pinecone&#45;specific metadata." alt="" coords="215,95,400,136"/>
+<area shape="rect" id="node5" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="424,95,609,136"/>
+<area shape="rect" id="node3" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="196,184,419,211"/>
+</map>

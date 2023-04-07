@@ -1,0 +1,38 @@
+<map id="pinecone::domain::arg_base" name="pinecone::domain::arg_base">
+<area shape="rect" id="node1" title="All operations require a common subset of information; this information forms the base arguments." alt="" coords="5,858,211,885"/>
+<area shape="rect" id="node2" href="$structpinecone_1_1domain_1_1create__operation__args.html" title=" " alt="" coords="280,5,483,76"/>
+<area shape="rect" id="node4" href="$structpinecone_1_1domain_1_1create__operation__args.html" title=" " alt="" coords="280,100,483,171"/>
+<area shape="rect" id="node6" href="$structpinecone_1_1domain_1_1describe__delete__operation__args.html" title=" " alt="" coords="259,195,504,251"/>
+<area shape="rect" id="node8" href="$structpinecone_1_1domain_1_1describe__delete__operation__args.html" title=" " alt="" coords="281,276,482,347"/>
+<area shape="rect" id="node10" href="$structpinecone_1_1domain_1_1describe__delete__operation__args.html" title=" " alt="" coords="266,371,497,427"/>
+<area shape="rect" id="node12" href="$structpinecone_1_1domain_1_1describe__delete__operation__args.html" title=" " alt="" coords="281,452,482,523"/>
+<area shape="rect" id="node14" href="$structpinecone_1_1domain_1_1list__operation__args.html" title=" " alt="" coords="280,547,483,603"/>
+<area shape="rect" id="node16" href="$structpinecone_1_1domain_1_1list__operation__args.html" title=" " alt="" coords="280,627,483,683"/>
+<area shape="rect" id="node18" href="$structpinecone_1_1domain_1_1list__operation__args.html" title=" " alt="" coords="280,707,483,763"/>
+<area shape="rect" id="node20" href="$structpinecone_1_1domain_1_1patch__operation__args.html" title=" " alt="" coords="275,788,488,859"/>
+<area shape="rect" id="node22" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title=" " alt="" coords="280,883,483,953"/>
+<area shape="rect" id="node24" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title=" " alt="" coords="280,977,483,1048"/>
+<area shape="rect" id="node26" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title=" " alt="" coords="275,1072,487,1143"/>
+<area shape="rect" id="node28" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title=" " alt="" coords="280,1167,483,1237"/>
+<area shape="rect" id="node30" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title=" " alt="" coords="280,1261,483,1332"/>
+<area shape="rect" id="node32" href="$structpinecone_1_1domain_1_1create__operation__args.html" title="Create operations construct themselves using a unique resource name and an operation&#45;dependent body p..." alt="" coords="275,1356,488,1397"/>
+<area shape="rect" id="node33" href="$structpinecone_1_1domain_1_1describe__delete__operation__args.html" title="Describe operations construct themselves using a unique resource name." alt="" coords="271,1421,491,1463"/>
+<area shape="rect" id="node34" href="$structpinecone_1_1domain_1_1list__operation__args.html" title="List operations are simple and construct themselves using only a URL." alt="" coords="295,1487,467,1528"/>
+<area shape="rect" id="node35" href="$structpinecone_1_1domain_1_1patch__operation__args.html" title="Patch operations construct themselves using a unique resource name and an operation&#45;dependent body pa..." alt="" coords="275,1552,488,1593"/>
+<area shape="rect" id="node36" href="$structpinecone_1_1domain_1_1vector__operation__args.html" title="Vector operations construct themselves using a unique resource name and an operation&#45;dependent body p..." alt="" coords="275,1617,488,1659"/>
+<area shape="rect" id="node3" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__create_01_4.html" title=" " alt="" coords="573,13,814,69"/>
+<area shape="rect" id="node5" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1index__create_01_4.html" title=" " alt="" coords="586,107,801,163"/>
+<area shape="rect" id="node7" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1index__describe_01_4.html" title=" " alt="" coords="586,195,801,251"/>
+<area shape="rect" id="node9" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__delete_01_4.html" title=" " alt="" coords="573,283,814,339"/>
+<area shape="rect" id="node11" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1index__delete_01_4.html" title=" " alt="" coords="586,371,801,427"/>
+<area shape="rect" id="node13" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__describe_01_4.html" title=" " alt="" coords="573,459,814,515"/>
+<area shape="rect" id="node15" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1index__list_01_4.html" title=" " alt="" coords="565,555,821,596"/>
+<area shape="rect" id="node17" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1actions__whoami_01_4.html" title=" " alt="" coords="581,627,806,683"/>
+<area shape="rect" id="node19" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__list_01_4.html" title=" " alt="" coords="552,715,835,756"/>
+<area shape="rect" id="node21" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1index__configure_01_4.html" title=" " alt="" coords="586,795,801,851"/>
+<area shape="rect" id="node23" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1vector__update_01_4.html" title=" " alt="" coords="584,890,803,946"/>
+<area shape="rect" id="node25" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1vector__delete_00_01filter_01_4.html" title=" " alt="" coords="584,985,803,1041"/>
+<area shape="rect" id="node27" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1vector__describe__index__stats_00_01filter_01_4.html" title=" " alt="" coords="584,1079,803,1135"/>
+<area shape="rect" id="node29" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1vector__query_00_01filter_01_4.html" title=" " alt="" coords="584,1174,803,1230"/>
+<area shape="rect" id="node31" href="$structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1vector__upsert_01_4.html" title=" " alt="" coords="584,1269,803,1325"/>
+</map>

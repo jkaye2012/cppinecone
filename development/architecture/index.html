@@ -514,7 +514,7 @@ supports. This is provided by:</p>
 <em>why</em> the code is structured in this way; it does not attempt to explain <em>how</em> each individual component works or
 why low-level implementation details were chosen.</p>
 <h2 id="the-public-client-api">The public client API</h2>
-<p>The <a href="/doxygen/html/structpinecone_1_1pinecone__client.html">public client API</a> is meant to be the primary (and, for now, only) entrypoint into Cppinecone. Users should not be
+<p>The <a href="/cppinecone/doxygen/html/structpinecone_1_1pinecone__client.html">public client API</a> is meant to be the primary (and, for now, only) entrypoint into Cppinecone. Users should not be
 required to use anything other than a client to access basic API functionality. Similarly, customizations applied to the
 API should be applied to the client instance so that instantiation remains simple and confined to a single concept
 within the code base.</p>
@@ -523,35 +523,35 @@ within the code base.</p>
 significantly different URL fragments, and many operations require metadata that must be retrieved from the API itself.
 These operation-level details are abstracted from client APIs and HTTP communication by the concept of opaque URL
 construction for each individual operation. This functionality is provided by the
-<a href="/doxygen/html/structpinecone_1_1net_1_1url__builder.html">url_builder</a>.</p>
+<a href="/cppinecone/doxygen/html/structpinecone_1_1net_1_1url__builder.html">url_builder</a>.</p>
 <h2 id="http-communication">HTTP communication</h2>
 <p>One of the simplest parts of Cppinecone, libcurl is used to perform the actual HTTP requests to Pinecone's REST API. The
-<a href="/doxygen/html/structpinecone_1_1net_1_1http__client_3_01threading__mode_1_1sync_01_4.html">http_client</a>
+<a href="/cppinecone/doxygen/html/structpinecone_1_1net_1_1http__client_3_01threading__mode_1_1sync_01_4.html">http_client</a>
 concept exists to abstract away the low-level details of CURL's APIs from the rest of Cppinecone's implementation. This
 also provides a convenient location for unified serde operations and consistent error handling across all API operations.</p>
 <h2 id="individual-api-operations">Individual API operations</h2>
 <p>Each API operation is implemented independently, but in terms of shared concepts that remove the need for
-boilerplate/repetition. The definitions for these concepts are <a href="/doxygen/html/operation__type_8hpp.html">stored together</a>.</p>
+boilerplate/repetition. The definitions for these concepts are <a href="/cppinecone/doxygen/html/operation__type_8hpp.html">stored together</a>.</p>
 <p>Generally speaking, the steps required to implement a new API operation are:</p>
 <ol>
 <li>Add the operation definition as a supported <code>operation_type</code></li>
-<li>Map the new <code>operation_type</code> to an <a href="/doxygen/html/operation__type_8hpp.html#a5a1a5d9d2152ec2530acf8e4cbc00859">API type</a></li>
-<li>Map the new <code>operation_type</code> to a <a href="/doxygen/html/operation__type_8hpp.html#a2b396a3a5f137adfe14202d0c0c0b76e">url fragment</a></li>
-<li>Map the new <code>operation_type</code> to an <a href="/doxygen/html/operation__type_8hpp.html#ac1271542a4aec7ece1b57b14bf12c475">HTTP method</a></li>
-<li>Define any <a href="/doxygen/html/index__types_8hpp.html">custom C++ types</a> necessary to represent the operation request/response</li>
-<li><a href="/doxygen/html/index__operations_8hpp.html">Wire up the operation</a></li>
+<li>Map the new <code>operation_type</code> to an <a href="/cppinecone/doxygen/html/operation__type_8hpp.html#a5a1a5d9d2152ec2530acf8e4cbc00859">API type</a></li>
+<li>Map the new <code>operation_type</code> to a <a href="/cppinecone/doxygen/html/operation__type_8hpp.html#a2b396a3a5f137adfe14202d0c0c0b76e">url fragment</a></li>
+<li>Map the new <code>operation_type</code> to an <a href="/cppinecone/doxygen/html/operation__type_8hpp.html#ac1271542a4aec7ece1b57b14bf12c475">HTTP method</a></li>
+<li>Define any <a href="/cppinecone/doxygen/html/index__types_8hpp.html">custom C++ types</a> necessary to represent the operation request/response</li>
+<li><a href="/cppinecone/doxygen/html/index__operations_8hpp.html">Wire up the operation</a></li>
 <li>Expose the operation via a new function on the public client</li>
 </ol>
 <hr />
 <p>Cppinecone buckets API operations into three different categories:</p>
 <ul>
-<li><a href="/doxygen/html/meta__operations_8hpp.html">Metadata operations</a>: provide information about the Pinecone API itself</li>
-<li><a href="/doxygen/html/index__operations_8hpp.html">Index operations</a>: CRUD operations on Pinecone indices and collections</li>
-<li><a href="/doxygen/html/vector__operations_8hpp.html">Vector operations</a>: CRUD operations on individual vectors within indices
+<li><a href="/cppinecone/doxygen/html/meta__operations_8hpp.html">Metadata operations</a>: provide information about the Pinecone API itself</li>
+<li><a href="/cppinecone/doxygen/html/index__operations_8hpp.html">Index operations</a>: CRUD operations on Pinecone indices and collections</li>
+<li><a href="/cppinecone/doxygen/html/vector__operations_8hpp.html">Vector operations</a>: CRUD operations on individual vectors within indices
   and collections</li>
 </ul>
 <p>The relationship between the API operation categories and the remainder of Cppinecone can be visualized with the file
-include diagram available within <a href="http://localhost:8000/doxygen/html/operation_8hpp.html">the generated documentation</a>.</p>
+include diagram available within <a href="http://localhost:8000/cppinecone/doxygen/html/operation_8hpp.html">the generated documentation</a>.</p>
 
 
 
