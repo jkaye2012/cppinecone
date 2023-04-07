@@ -8,16 +8,21 @@ on:
 
 jobs:
   deploy:
-    runs:
-      using: 'docker'
-      image: 'Dockerfile'
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Build and deploy GitHub Pages
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build docker images
+      run: docker build -t local .devcontainer/
+
+    - name: Build docs
+      run: docker run -it -v $PWD:/cppinecone -w/cppinecone local run_docs.sh --build
+
+    - name: Deploy GitHub Pages
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ./run_docs.sh --build
         cd site
         git init --bare
         git remote add origin https://github.com/jkaye2012/cppinecone
