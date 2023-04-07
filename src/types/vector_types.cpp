@@ -1,1 +1,0 @@
-#include "pinecone/types/vector_types.hpp"
