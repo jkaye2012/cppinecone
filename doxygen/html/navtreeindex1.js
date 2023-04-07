@@ -1,5 +1,15 @@
 var NAVTREEINDEX1 =
 {
+"cpp/io/manip/setbase.html":[2,0,1,370],
+"cpp/io/manip/setfill.html":[2,0,1,372],
+"cpp/io/manip/setiosflags.html":[2,0,1,373],
+"cpp/io/manip/setprecision.html":[2,0,1,375],
+"cpp/io/manip/setw.html":[2,0,1,377],
+"cpp/io/manip/showbase.html":[2,0,1,294],
+"cpp/io/manip/showbase.html":[2,0,1,378],
+"cpp/io/manip/showpoint.html":[2,0,1,295],
+"cpp/io/manip/showpoint.html":[2,0,1,379],
+"cpp/io/manip/showpos.html":[2,0,1,296],
 "cpp/io/manip/showpos.html":[2,0,1,380],
 "cpp/io/manip/skipws.html":[2,0,1,386],
 "cpp/io/manip/skipws.html":[2,0,1,297],
@@ -188,8 +198,8 @@ var NAVTREEINDEX1 =
 "cpp/string/byte/strtok.html":[2,0,1,424],
 "cpp/string/byte/strtol.html":[2,0,1,425],
 "cpp/string/byte/strtol.html":[2,0,1,427],
-"cpp/string/byte/strtoul.html":[2,0,1,428],
 "cpp/string/byte/strtoul.html":[2,0,1,429],
+"cpp/string/byte/strtoul.html":[2,0,1,428],
 "cpp/string/byte/strxfrm.html":[2,0,1,431],
 "cpp/string/byte/tolower.html":[2,0,1,449],
 "cpp/string/byte/toupper.html":[2,0,1,450],
@@ -239,15 +249,5 @@ var NAVTREEINDEX1 =
 "cpp/string/wide/wcsrchr.html":[2,0,1,500],
 "cpp/string/wide/wcsspn.html":[2,0,1,501],
 "cpp/string/wide/wcsstr.html":[2,0,1,502],
-"cpp/string/wide/wcstof.html":[2,0,1,504],
-"cpp/string/wide/wcstof.html":[2,0,1,503],
-"cpp/string/wide/wcstof.html":[2,0,1,508],
-"cpp/string/wide/wcstoimax.html":[2,0,1,505],
-"cpp/string/wide/wcstoimax.html":[2,0,1,513],
-"cpp/string/wide/wcstok.html":[2,0,1,506],
-"cpp/string/wide/wcstol.html":[2,0,1,507],
-"cpp/string/wide/wcstol.html":[2,0,1,509],
-"cpp/string/wide/wcstoul.html":[2,0,1,512],
-"cpp/string/wide/wcstoul.html":[2,0,1,511],
-"cpp/string/wide/wcsxfrm.html":[2,0,1,514]
+"cpp/string/wide/wcstof.html":[2,0,1,504]
 };

@@ -1,5 +1,15 @@
 var NAVTREEINDEX0 =
 {
+"":[2,0,0],
+"":[2,0,0,1],
+"":[2,0,0,2],
+"":[2,0,0,2,0],
+"":[2,0,0,0],
+"":[2,0,0,3],
+"":[2,0,1,0],
+"":[2,0,1,1],
+"":[2,0,1,2],
+"":[2,0,1,3],
 "CMakeLists_8txt-example.html":[5,2],
 "accepted_8hpp.html":[4,0,0,0,2,0],
 "accepted_8hpp_source.html":[4,0,0,0,2,0],
@@ -106,8 +116,8 @@ var NAVTREEINDEX0 =
 "cpp/algorithm/upper_bound.html":[2,0,1,471],
 "cpp/atomic/atomic_compare_exchange.html":[2,0,1,32],
 "cpp/atomic/atomic_compare_exchange.html":[2,0,1,34],
-"cpp/atomic/atomic_compare_exchange.html":[2,0,1,35],
 "cpp/atomic/atomic_compare_exchange.html":[2,0,1,33],
+"cpp/atomic/atomic_compare_exchange.html":[2,0,1,35],
 "cpp/atomic/atomic_exchange.html":[2,0,1,36],
 "cpp/atomic/atomic_exchange.html":[2,0,1,37],
 "cpp/atomic/atomic_fetch_add.html":[2,0,1,38],
@@ -239,15 +249,5 @@ var NAVTREEINDEX0 =
 "cpp/io/manip/left.html":[2,0,1,352],
 "cpp/io/manip/put_money.html":[2,0,1,318],
 "cpp/io/manip/put_time.html":[2,0,1,319],
-"cpp/io/manip/resetiosflags.html":[2,0,1,345],
-"cpp/io/manip/setbase.html":[2,0,1,370],
-"cpp/io/manip/setfill.html":[2,0,1,372],
-"cpp/io/manip/setiosflags.html":[2,0,1,373],
-"cpp/io/manip/setprecision.html":[2,0,1,375],
-"cpp/io/manip/setw.html":[2,0,1,377],
-"cpp/io/manip/showbase.html":[2,0,1,294],
-"cpp/io/manip/showbase.html":[2,0,1,378],
-"cpp/io/manip/showpoint.html":[2,0,1,295],
-"cpp/io/manip/showpoint.html":[2,0,1,379],
-"cpp/io/manip/showpos.html":[2,0,1,296]
+"cpp/io/manip/resetiosflags.html":[2,0,1,345]
 };

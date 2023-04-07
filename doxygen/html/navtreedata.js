@@ -49,11 +49,11 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"CMakeLists_8txt-example.html",
-"cpp/io/manip/showpos.html",
-"cpp/string/wide/wctrans.html",
-"result_8hpp.html#ab65754802a7214fedad26138dd6da613",
-"structpinecone_1_1types_1_1vector.html"
+"",
+"cpp/io/manip/setbase.html",
+"cpp/string/wide/wcstof.html",
+"pinecone_8hpp.html#a9e113747fda3c828c9dcc65af9cdceed",
+"structpinecone_1_1types_1_1update__request_1_1builder.html#a90911fa88796177677255b4e1bd5e408"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
