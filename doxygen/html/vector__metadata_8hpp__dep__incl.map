@@ -1,0 +1,7 @@
+<map id="include/pinecone/types/vector_metadata.hpp" name="include/pinecone/types/vector_metadata.hpp">
+<area shape="rect" id="node1" title="Encoding for Pinecone&#39;s vector metadata API." alt="" coords="5,5,177,47"/>
+<area shape="rect" id="node2" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="40,273,225,315"/>
+<area shape="rect" id="node3" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="87,363,309,389"/>
+<area shape="rect" id="node4" href="$filters_8hpp.html" title="Filters supported by complex vector API operations." alt="" coords="155,95,327,136"/>
+<area shape="rect" id="node5" href="$vector__types_8hpp.html" title="Native C++ types modeling the results of vector operations." alt="" coords="104,184,276,225"/>
+</map>

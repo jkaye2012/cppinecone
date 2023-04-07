@@ -1,0 +1,4 @@
+var structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__describe_01_4 =
+[
+    [ "describe_delete_operation_args", "structpinecone_1_1domain_1_1operation__args_3_01operation__type_1_1collection__describe_01_4.html#a3637117c79d64fc60c6e0fcf166137db", null ]
+];

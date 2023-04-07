@@ -1,0 +1,19 @@
+<map id="include/pinecone/util/visit.hpp" name="include/pinecone/util/visit.hpp">
+<area shape="rect" id="node1" title="Simple visitor implementation." alt="" coords="496,5,654,47"/>
+<area shape="rect" id="node2" href="$curl__result_8hpp.html" title="Wraps CURL results for type and exception safety." alt="" coords="496,95,654,136"/>
+<area shape="rect" id="node3" href="$operation_8hpp.html" title="Metaprogamming infrastructure for generation of per&#45;operation code." alt="" coords="273,452,458,493"/>
+<area shape="rect" id="node9" href="$result_8hpp.html" title="Models the possibility of failure for Pinecone operations." alt="" coords="691,184,848,225"/>
+<area shape="rect" id="node4" href="$index__operations_8hpp.html" title="API operations providing functionality for Pinecone indices." alt="" coords="586,541,772,583"/>
+<area shape="rect" id="node5" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="698,631,921,657"/>
+<area shape="rect" id="node6" href="$meta__operations_8hpp.html" title="API operations serving Pinecone&#45;specific metadata." alt="" coords="194,541,380,583"/>
+<area shape="rect" id="node7" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="848,541,1033,583"/>
+<area shape="rect" id="node8" href="$http__client_8hpp.html" title="A bare&#45;bones HTTP client implementation." alt="" coords="404,541,562,583"/>
+<area shape="rect" id="node10" href="$accepted_8hpp.html" title="A monostate sentinel type for operations that have no associated response." alt="" coords="684,363,856,404"/>
+<area shape="rect" id="node11" href="$parser_8hpp.html" title="Parses HTTP responses to domain types." alt="" coords="534,452,706,493"/>
+<area shape="rect" id="node12" href="$api__metadata_8hpp.html" title="Metadata required by the Pinecone API." alt="" coords="92,273,264,315"/>
+<area shape="rect" id="node14" href="$index__types_8hpp.html" title="Native C++ type modeling the results of index operations." alt="" coords="884,452,1056,493"/>
+<area shape="rect" id="node15" href="$vector__metadata_8hpp.html" title="Encoding for Pinecone&#39;s vector metadata API." alt="" coords="1182,273,1354,315"/>
+<area shape="rect" id="node17" href="$vector__types_8hpp.html" title="Native C++ types modeling the results of vector operations." alt="" coords="1132,452,1304,493"/>
+<area shape="rect" id="node13" href="$url__builder_8hpp.html" title="Constructs Pinecone API URLs." alt="" coords="40,363,198,404"/>
+<area shape="rect" id="node16" href="$filters_8hpp.html" title="Filters supported by complex vector API operations." alt="" coords="1233,363,1405,404"/>
+</map>

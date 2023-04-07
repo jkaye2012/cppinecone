@@ -1,0 +1,9 @@
+<map id="include/pinecone/net/url_builder.hpp" name="include/pinecone/net/url_builder.hpp">
+<area shape="rect" id="node1" title="Constructs Pinecone API URLs." alt="" coords="542,5,699,47"/>
+<area shape="rect" id="node2" href="$operation_8hpp.html" title="Metaprogamming infrastructure for generation of per&#45;operation code." alt="" coords="372,95,557,136"/>
+<area shape="rect" id="node4" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="352,273,575,300"/>
+<area shape="rect" id="node3" href="$index__operations_8hpp.html" title="API operations providing functionality for Pinecone indices." alt="" coords="5,184,191,225"/>
+<area shape="rect" id="node5" href="$meta__operations_8hpp.html" title="API operations serving Pinecone&#45;specific metadata." alt="" coords="267,184,452,225"/>
+<area shape="rect" id="node6" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="476,184,661,225"/>
+<area shape="rect" id="node7" href="$http__client_8hpp.html" title="A bare&#45;bones HTTP client implementation." alt="" coords="686,184,843,225"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="include/pinecone/types/accepted.hpp" name="include/pinecone/types/accepted.hpp">
+<area shape="rect" id="node1" title="A monostate sentinel type for operations that have no associated response." alt="" coords="121,5,293,47"/>
+<area shape="rect" id="node2" href="$index__operations_8hpp.html" title="API operations providing functionality for Pinecone indices." alt="" coords="32,184,217,225"/>
+<area shape="rect" id="node3" href="$pinecone_8hpp.html" title="The Pinecone API client (start here!)" alt="" coords="117,273,340,300"/>
+<area shape="rect" id="node4" href="$vector__operations_8hpp.html" title="API operations providing functionality for Pinecone vectors." alt="" coords="450,184,636,225"/>
+<area shape="rect" id="node5" href="$parser_8hpp.html" title="Parses HTTP responses to domain types." alt="" coords="226,95,398,136"/>
+<area shape="rect" id="node6" href="$meta__operations_8hpp.html" title="API operations serving Pinecone&#45;specific metadata." alt="" coords="241,184,426,225"/>
+</map>

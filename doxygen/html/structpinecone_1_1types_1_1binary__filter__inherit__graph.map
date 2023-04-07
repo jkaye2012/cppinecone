@@ -1,0 +1,4 @@
+<map id="pinecone::types::binary_filter" name="pinecone::types::binary_filter">
+<area shape="rect" id="node1" title="Binary filters are simple predicates; they compare a single metadata value to a provided operand." alt="" coords="5,95,180,136"/>
+<area shape="rect" id="node2" href="$structpinecone_1_1types_1_1filter__base.html" title=" " alt="" coords="9,5,177,47"/>
+</map>
