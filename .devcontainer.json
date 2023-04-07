@@ -10,6 +10,7 @@
                 "jeff-hykin.better-cpp-syntax",
                 "llvm-vs-code-extensions.vscode-clangd",
                 "ms-azuretools.vscode-docker",
+                "ms-vscode.cmake-tools",
                 "ms-vscode.cpptools-themes",
                 "twxs.cmake"
             ]

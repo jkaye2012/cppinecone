@@ -33,6 +33,9 @@ These decisions can be modified through the use of [API customizations](./custom
   control
 * Some Pinecone API operations seem to return undocumented data with their results. Cppinecone provides support only for
   data explicitly documented in Pinecone's API reference
+* Cppinecone has been tested only on Debian-based Linux distributions using the Clang compiler. Other platforms and
+  compilers should be supported, but this support has not been verified. If you find compatibility issues, please create
+  an issue.
 
 ## Dependencies
 
@@ -43,6 +46,7 @@ Currently, Cppinecone carries the following required dependencies:
     * [CURL](https://curl.se/docs/) for http communication
 * Used within the client implementation
     * [nlohmann/json](https://github.com/nlohmann/json) for JSON serde
+    * [spdlog](https://github.com/gabime/spdlog) for logging
     * [Catch2](https://github.com/catchorg/Catch2) for unit testing
 
 More information about these dependencies and what they mean for users can be found in the [installation documentation](./installation.md).

@@ -1,16 +1,21 @@
 #include <array>
 #include <iostream>
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 #include "pinecone/pinecone.hpp"
 #include "pinecone/types/filters.hpp"
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/types/vector_types.hpp"
+#include "pinecone/util/logging.hpp"
 
 namespace pf = pinecone::types::filters;
 
 auto main(int /*argc*/, char** argv) -> int
 {
+  pinecone::util::setup_logger([](auto const& name) { return spdlog::stderr_color_mt(name); });
+
   auto client_build = pinecone::synchronous_client::build({"us-west1-gcp", argv[1]});
   if (client_build.index() != 0) {
     std::cerr << "Failed to build client" << std::endl;

@@ -34,7 +34,8 @@ FetchContent_Populate(libcppinecone)
 add_subdirectory(${libcppinecone_SOURCE_DIR})
 
 add_executable(cppinecone_examples_exe main.cpp)
-target_link_libraries(cppinecone_examples_exe PRIVATE cppinecone)
+target_include_directories(main PRIVATE ${CPPINECONE_INCLUDE_DIRS})
+target_link_libraries(main PRIVATE ${CPPINECONE_LIBRARIES})
 ```
 
 Cppinecone should now be available via `#include <pinecone/pinecone.hpp>`.
@@ -44,10 +45,11 @@ Cppinecone should now be available via `#include <pinecone/pinecone.hpp>`.
 By default, Cppinecone's CURL configuration assumes that OpenSSL should be used for TLS, and that the library is
 available for linking when CURL is being built.
 
-[Two third-party libraries](./index.md#dependencies) are vended with Cppinecone for ease of use. The configuration of these libraries can be
-controlled by the user by setting their supported CMake variables. For most users, the library defaults should be
-reasonable.
+[Three third-party libraries](./index.md#dependencies) are vended with Cppinecone for ease of use. The configuration of
+these libraries can be controlled by the user by setting their supported CMake variables. For most users, the library
+defaults should be reasonable.
 
 * CURL's supported variables are unfortunately not well-documented. You can find them directly in the
   [CMakeLists.txt](https://github.com/curl/curl/blob/master/CMakeLists.txt) file in their main repository
 * JSON's CMake support is [well-documented](https://json.nlohmann.me/integration/cmake/)
+* Spdlog does not require CMake configuration

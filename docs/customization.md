@@ -20,4 +20,20 @@ is completely up to the user to configure logging if they wish to capture Cppine
 are **not** considered a public API surface, meaning that the logs written by Cppinecone should never be relied upon for
 any automated purpose. Written logs may change with any release, including patch releases.
 
+See [the logging file](/doxygen/html/logging_8hpp.html) for full details.
+
+Note that logging is currently not particularly useful. It should be improved in the near future.
+
 ### Example
+
+```c++
+#include <pinecone/util/logging.hpp>
+
+static inline void example() noexcept
+{
+    pinecone::util::setup_logger([](auto const& name) {
+        return spdlog::stdout_color_mt(name);
+    });
+    pinecone::synchronous_client client = // ...
+}
+```

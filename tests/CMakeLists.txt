@@ -14,5 +14,5 @@ set(cppinecone_test_files
 )
 
 add_executable(cppinecone_tests ${cppinecone_test_files})
-target_include_directories(cppinecone_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(cppinecone_tests PRIVATE Catch2::Catch2WithMain cppinecone)
+target_include_directories(cppinecone_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CPPINECONE_INCLUDE_DIRS})
+target_link_libraries(cppinecone_tests PRIVATE Catch2::Catch2WithMain ${CPPINECONE_LIBRARIES})

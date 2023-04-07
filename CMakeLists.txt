@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 set(CPPINECONE_BUILD_TESTS "off" CACHE BOOL "Whether to build tests")
 set(CPPINECONE_CURL_VERSION 7.86.0 CACHE STRING "libcurl version")
 set(CPPINECONE_JSON_VERSION 3.11.2 CACHE STRING "json version")
+set(CPPINECONE_SPDLOG_VERSION 1.11.0 CACHE STRING "spdlog version")
 set(CPPINECONE_CATCH2_VERSION 3.1.1 CACHE STRING "catch2 version")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -26,8 +27,15 @@ FetchContent_Declare(json
 )
 FetchContent_MakeAvailable(json)
 
+FetchContent_Declare(spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v${CPPINECONE_SPDLOG_VERSION}
+)
+FetchContent_MakeAvailable(spdlog)
+
 set(includes
   ${nlohmann_json_SOURCE_DIR}/include
+  ${spdlog_SOURCE_DIR}/include
   ${curl_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
@@ -52,18 +60,27 @@ add_library(cppinecone STATIC
   src/types/vector_metadata.cpp
   src/types/vector_types.cpp
   src/util/curl_result.cpp
+  src/util/logging.cpp
   src/util/result.cpp
   src/util/visit.cpp
 )
 
+set(CPPINECONE_LIBRARIES
+    cppinecone
+    libcurl
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+    CACHE STRING "Libraries to link in order to build Cppinecone"
+)
+
 target_include_directories(cppinecone SYSTEM BEFORE PUBLIC ${CPPINECONE_INCLUDE_DIRS})
-target_link_libraries(cppinecone PRIVATE libcurl nlohmann_json::nlohmann_json)
+target_link_libraries(cppinecone PRIVATE libcurl nlohmann_json::nlohmann_json spdlog::spdlog)
 
 if(${CPPINECONE_BUILD_TESTS})
   message("-- Tests and examples will be built")
   add_executable(main main.cpp)
-  target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(main PRIVATE cppinecone)
+  target_include_directories(main PRIVATE ${CPPINECONE_INCLUDE_DIRS})
+  target_link_libraries(main PRIVATE ${CPPINECONE_LIBRARIES})
 
   add_subdirectory(tests)
 endif()

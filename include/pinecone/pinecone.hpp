@@ -30,6 +30,7 @@
 #include "pinecone/types/index_types.hpp"
 #include "pinecone/types/vector_metadata.hpp"
 #include "pinecone/types/vector_types.hpp"
+#include "pinecone/util/logging.hpp"
 #include "pinecone/util/result.hpp"
 
 namespace pinecone
@@ -94,23 +95,27 @@ struct pinecone_client {
 
   [[nodiscard]] auto get_api_metdata() const noexcept -> util::result<types::api_metadata>
   {
+    util::logger()->info("Retrieving API metadata");
     return _http_client->request(args<type::actions_whoami>{_url_builder});
   }
 
   [[nodiscard]] auto create_index(types::new_index index) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Creating index");
     return _http_client->request(args<type::index_create>{_url_builder, std::move(index)});
   }
 
   [[nodiscard]] auto list_indexes() const noexcept -> util::result<std::vector<std::string>>
   {
+    util::logger()->info("Listing indices");
     return _http_client->request(args<type::index_list>{_url_builder});
   }
 
   [[nodiscard]] auto describe_index(std::string_view name) const noexcept
       -> util::result<types::database>
   {
+    util::logger()->info("Describing index");
     return _http_client->request(args<type::index_describe>{_url_builder, name});
   }
 
@@ -118,35 +123,41 @@ struct pinecone_client {
                                      types::index_configuration config) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Configuring index");
     return _http_client->request(args<type::index_configure>(_url_builder, name, config));
   }
 
   [[nodiscard]] auto delete_index(std::string_view name) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Deleting index");
     return _http_client->request(args<type::index_delete>{_url_builder, name});
   }
 
   [[nodiscard]] auto list_collections() const noexcept -> util::result<std::vector<std::string>>
   {
+    util::logger()->info("Listing collections");
     return _http_client->request(args<type::collection_list>{_url_builder});
   }
 
   [[nodiscard]] auto describe_collection(std::string_view name) const noexcept
       -> util::result<types::collection>
   {
+    util::logger()->info("Describing collection");
     return _http_client->request(args<type::collection_describe>{_url_builder, name});
   }
 
   [[nodiscard]] auto delete_collection(std::string_view name) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Deleting collection");
     return _http_client->request(args<type::collection_delete>{_url_builder, name});
   }
 
   [[nodiscard]] auto create_collection(types::new_collection collection) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Creating collection");
     return _http_client->request(
         args<type::collection_create>(_url_builder, std::move(collection)));
   }
@@ -154,6 +165,7 @@ struct pinecone_client {
   [[nodiscard]] auto describe_index_stats(std::string_view name) const noexcept
       -> util::result<types::index_stats>
   {
+    util::logger()->info("Descriving index stats");
     return _http_client->request(vec_args<type::vector_describe_index_stats, types::no_filter>{
         _url_builder, name, types::filters::none()});
   }
@@ -162,6 +174,7 @@ struct pinecone_client {
   [[nodiscard]] auto query(std::string_view name, types::query<filter> query) const noexcept
       -> util::result<types::query_result>
   {
+    util::logger()->info("Querying index");
     return _http_client->request(
         vec_args<type::vector_query, filter>{_url_builder, name, std::move(query)});
   }
@@ -171,6 +184,7 @@ struct pinecone_client {
                                     types::delete_request<filter> req) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Deleting vectors");
     return _http_client->request(
         vec_args<type::vector_delete, filter>{_url_builder, name, std::move(req)});
   }
@@ -178,12 +192,14 @@ struct pinecone_client {
   [[nodiscard]] auto upsert_vectors(std::string_view name, types::upsert_request req) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Upserting vectors");
     return _http_client->request(args<type::vector_upsert>{_url_builder, name, std::move(req)});
   }
 
   [[nodiscard]] auto update_vector(std::string_view name, types::update_request req) const noexcept
       -> util::result<types::accepted>
   {
+    util::logger()->info("Updating vectors");
     return _http_client->request(args<type::vector_update>{_url_builder, name, std::move(req)});
   }
 
@@ -195,6 +211,7 @@ struct pinecone_client {
                   std::unique_ptr<net::http_client<Mode>> client) noexcept
       : _url_builder(std::move(url_builder)), _http_client(std::move(client))
   {
+    util::logger()->info("Client construction completed successfully");
   }
 
   template <typename filter>

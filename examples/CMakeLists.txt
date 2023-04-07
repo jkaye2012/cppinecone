@@ -16,4 +16,5 @@ FetchContent_Populate(libcppinecone)
 add_subdirectory(${libcppinecone_SOURCE_DIR})
 
 add_executable(cppinecone_examples_exe main.cpp)
-target_link_libraries(cppinecone_examples_exe PRIVATE cppinecone)
+target_include_directories(cppinecone_examples_exe PRIVATE ${CPPINECONE_INCLUDE_DIRS})
+target_link_libraries(cppinecone_examples_exe PRIVATE ${CPPINECONE_LIBRARIES})
