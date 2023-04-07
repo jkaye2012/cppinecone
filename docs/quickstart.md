@@ -52,7 +52,7 @@ The synchronous client is **not** thread-safe; if multiple threads require Pinec
 thread or ensure that the client is protected by a [mutex](https://en.cppreference.com/w/cpp/thread/mutex).
 Once the asynchronous client is released, this restriction will be lifted.
 
-All API operations by default return a [result](/doxygen/html/structpinecone_1_1util_1_1result.html). `result` models the possibility
+All API operations by default return a [result](/cppinecone/doxygen/html/structpinecone_1_1util_1_1result.html). `result` models the possibility
 of failure; as all API operations require network access, they are all fallible. `result` is implicitly
 `nodiscard`, meaning that your compiler will warn you if you accidentally forget to ensure that an operation
 was successful.

@@ -11,7 +11,7 @@ desired version of the library.
 
 ### Example
 
-The [examples directory](/doxygen/html/CMakeLists_8txt-example.html) contains a complete example of Cppinecone
+The [examples directory](/cppinecone/doxygen/html/CMakeLists_8txt-example.html) contains a complete example of Cppinecone
 integration into another project. Most users will want to use a versioned tag to ensure library stability. By default,
 tests and the executable harness are not built. There is generally no reason for end-users to desire these targets.
 
