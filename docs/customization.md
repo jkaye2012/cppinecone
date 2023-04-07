@@ -27,7 +27,9 @@ Note that logging is currently not particularly useful. It should be improved in
 ### Example
 
 ```c++
+#include <pinecone/pinecone.hpp>
 #include <pinecone/util/logging.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 static inline void example() noexcept
 {
