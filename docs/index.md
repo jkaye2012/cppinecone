@@ -6,7 +6,7 @@ To learn about the details of the Pinecone API, please see their [reference
 documentation](https://docs.pinecone.io/reference/).
 
 While I recommend starting with the [quick start guide](./quickstart.md), you may also wish to take a look at the
-[client](./doxygen/html/structpinecone_1_1pinecone__client.html), which serves as the entry-point to the API and is the
+[client](/doxygen/html/structpinecone_1_1pinecone__client.html), which serves as the entry-point to the API and is the
 primary public interface for users of Cppinecone.
 
 ## Disclaimer
@@ -22,7 +22,7 @@ Cppinecone makes a small number of design decisions that users may wish to be aw
 
 * The client will never throw exceptions
 * Fallible operations will _always_ return a
-  [result](http://localhost:8000/doxygen/html/structpinecone_1_1util_1_1result.html)
+  [result](/doxygen/html/structpinecone_1_1util_1_1result.html)
 
 These decisions can be modified through the use of [API customizations](./customization.md).
 

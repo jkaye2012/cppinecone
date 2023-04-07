@@ -2,7 +2,7 @@
 
 Cppinecone is a C++-17 client for the [Pinecone](https://pinecone.io) vector database.
 
-For technical details (including the quick-start guide), please see [the official documentation](https://cppinecone.github.io).
+For technical details (including the quick-start guide), please see [the official documentation](https://jordankaye.dev/cppinecone/).
 
 ## Features
 
